@@ -75,19 +75,13 @@ body {
 }
 
 
-.circle {
-    width: 15px;
-    height: 15px;
-    border-radius: 50%;
-    position: absolute;
-}
-
 .target-circle {
-    background-color: #ea234b;
-    width: 15px; /* Set the width of the circle */
-    height: 15px; /* Set the height of the circle */
-    position: absolute; /* Ensure the circle positions correctly */
+    width: 6px; /* Set the width of the circle */
+    height: 6px; /* Set the height of the circle */
     border-radius: 50%; /* Make the div circular */
+    border: 4px solid; /* Default border color */
+    border: 4px solid #d3d3d3; /* Default border color */
+    position: absolute; /* Ensure the circle positions correctly */
 }
 #moving-circle {
     background-color: #00c1d5;

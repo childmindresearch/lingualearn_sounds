@@ -9,7 +9,7 @@ let analyser;
 let microphone;
 let isListening = false;
 let currentWordIndex = -1;
-let markerRadius = 15; // copied from style.css
+let markerRadius = 12; // copied from style.css
 let plotWidth = 800; // copied from style.css
 let plotHeight = 100; // copied from style.css
 let numberOfVerticalLines = 15;
@@ -65,27 +65,55 @@ async function createModel() {
 async function init() {
     const recognizer = await createModel();
     const classLabels = recognizer.wordLabels(); // get class labels
+    // Sort classLabels, with Background at the bottom
+    classLabels.sort((a, b) => {
+        if(a === "Background") return 1;
+        if(b === "Background") return -1;
+        return a.localeCompare(b); // Sort other labels alphabetically
+    });
+    
     const labelContainer = document.getElementById("label-container");
     for (let i = 0; i < classLabels.length; i++) {
-        labelContainer.appendChild(document.createElement("div"));
+        const labelDiv = document.createElement("div");
+        labelDiv.style.fontSize = "12px"; // Smaller font size for predictions
+        labelContainer.appendChild(labelDiv);
     }
 
     // listen() takes two arguments:
     // 1. A callback function that is invoked anytime a word is recognized.
     // 2. A configuration object with adjustable fields
     recognizer.listen(result => {
+        vowels.forEach(vowel => {
+            const targetCircle = document.getElementById('target-' + vowel.vowel);
+            if (targetCircle) {
+                const index = classLabels.indexOf(vowel.vowel); // Assuming classLabels matches vowel.vowel
+                const score = result.scores[index];
+                targetCircle.style.backgroundColor = scoreToColor(score); // Fill color based on score
+                // Set border color based on current word's vowel
+                targetCircle.style.borderColor = vowel.vowel === words[currentWordIndex].vowel ? '#ea234b' : '#d3d3d3';
+            }
+        });
+        /*
         const scores = result.scores; // probability of prediction for each class
         // render the probability scores per class
         for (let i = 0; i < classLabels.length; i++) {
             const classPrediction = classLabels[i] + ": " + result.scores[i].toFixed(2);
             labelContainer.childNodes[i].innerHTML = classPrediction;
         }
+        */
     }, {
         includeSpectrogram: true, // in case listen should return result.spectrogram
         probabilityThreshold: 0.75,
         invokeCallbackOnNoiseAndUnknown: true,
-        overlapFactor: 0.50 // probably want between 0.5 and 0.75. More info in README
+        overlapFactor: 0.50
     });
+}
+
+// Function to map a score to a color
+function scoreToColor(score) {
+    // Interpolate between light gray for low score and red for high score
+    const percent = score; // Assuming score is already normalized
+    return percent > 0.5 ? '#ea234b' : '#d3d3d3';
 }
 
 /*
@@ -332,14 +360,16 @@ function addAxisLabels() {
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     initializePlot();
-    let position = updateDisplay();
-    document.getElementById('start-button-img').addEventListener('click', () => {
-        /*
+    updateDisplay(); // Initial display update
+    document.getElementById('start-button-img').addEventListener('click', async () => {
         if (!isListening) {
-            initAudio();
+            const recognizer = await createModel(); // Load and prepare the model
+            init(recognizer); // Pass the loaded model to init for setting up real-time predictions
+            isListening = true; // Update the listening state
+            // Hide the start button
             let startButtonImg = document.getElementById('start-button-img');
             startButtonImg.style.visibility = 'hidden';
             startButtonImg.style.opacity = '0';
-        }*/
+        }
     });
 });
