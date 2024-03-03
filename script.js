@@ -4,9 +4,9 @@
 */
 
 // Define global variables
-let audioContext;
-let analyser;
-let microphone;
+//let audioContext;
+//let analyser;
+//let microphone;
 let isListening = false;
 let currentWordIndex = -1;
 let markerRadius = 11; // copied from style.css
@@ -18,6 +18,7 @@ let xSpacing = plotWidth / numberOfVerticalLines;
 let ySpacing = plotHeight / numberOfHorizontalLines;
 let imageSize = 400;
 const modelURL = "https://teachablemachine.withgoogle.com/models/g26KsVfaq/"; // Teachable Machine tensorflow model
+const sampleRate = 44100;
 
 // Words
 const words = [
@@ -63,50 +64,59 @@ async function createModel() {
 }
 
 async function init() {
+    // Create an AudioContext with the desired sample rate.
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: sampleRate });
+
+    this.sampleRateHz = audioContext.sampleRate; // This will be 44100 if the browser supports setting the sample rate
+    //console.log("Value of sampleRateHz:", this.sampleRateHz);
+    //console.log("Value of audioContext sample rate:", audioContext.sampleRate);
+
+    // Access the user's microphone and create a source node
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const source = audioContext.createMediaStreamSource(stream);
+
+    // Additional setup for the recognizer here
     const recognizer = await createModel();
+
+    // Adjust recognizer's audio processing to use the audio context
+    recognizer.ensureModelLoaded().then(() => {
+        // listen() takes two arguments:
+        // 1. A callback function that is invoked anytime a word is recognized.
+        // 2. A configuration object with adjustable fields
+        recognizer.listen(result => {
+            vowels.forEach(vowel => {
+                const targetCircle = document.getElementById('target-' + vowel.vowel);
+                if (targetCircle) {
+                    const index = classLabels.indexOf(vowel.vowel); // Assuming classLabels matches vowel.vowel
+                    const score = result.scores[index];
+                    targetCircle.style.backgroundColor = scoreToColor(score); // Fill color based on score
+                    // Set border color based on current word's vowel
+                    //targetCircle.style.borderColor = vowel.vowel === words[currentWordIndex].vowel ? '#ea234b' : '#d3d3d3';
+                }
+            });
+            /*
+            const scores = result.scores; // probability of prediction for each class
+            // render the probability scores per class
+            for (let i = 0; i < classLabels.length; i++) {
+                const classPrediction = classLabels[i] + ": " + result.scores[i].toFixed(2);
+                labelContainer.childNodes[i].innerHTML = classPrediction;
+            }
+            */
+        }, {
+            includeSpectrogram: true, // in case listen should return result.spectrogram
+            probabilityThreshold: 0.75,
+            invokeCallbackOnNoiseAndUnknown: true,
+            overlapFactor: 0.50
+        });
+    });
+
     const classLabels = recognizer.wordLabels(); // get class labels
     // Sort classLabels, with Background at the bottom
     classLabels.sort((a, b) => {
         if(a === "Background") return 1;
         if(b === "Background") return -1;
         return a.localeCompare(b); // Sort other labels alphabetically
-    });
-    
-    /*const labelContainer = document.getElementById("label-container");
-    for (let i = 0; i < classLabels.length; i++) {
-        const labelDiv = document.createElement("div");
-        labelDiv.style.fontSize = "12px"; // Smaller font size for predictions
-        labelContainer.appendChild(labelDiv);
-    }*/
-
-    // listen() takes two arguments:
-    // 1. A callback function that is invoked anytime a word is recognized.
-    // 2. A configuration object with adjustable fields
-    recognizer.listen(result => {
-        vowels.forEach(vowel => {
-            const targetCircle = document.getElementById('target-' + vowel.vowel);
-            if (targetCircle) {
-                const index = classLabels.indexOf(vowel.vowel); // Assuming classLabels matches vowel.vowel
-                const score = result.scores[index];
-                targetCircle.style.backgroundColor = scoreToColor(score); // Fill color based on score
-                // Set border color based on current word's vowel
-                //targetCircle.style.borderColor = vowel.vowel === words[currentWordIndex].vowel ? '#ea234b' : '#d3d3d3';
-            }
-        });
-        /*
-        const scores = result.scores; // probability of prediction for each class
-        // render the probability scores per class
-        for (let i = 0; i < classLabels.length; i++) {
-            const classPrediction = classLabels[i] + ": " + result.scores[i].toFixed(2);
-            labelContainer.childNodes[i].innerHTML = classPrediction;
-        }
-        */
-    }, {
-        includeSpectrogram: true, // in case listen should return result.spectrogram
-        probabilityThreshold: 0.75,
-        invokeCallbackOnNoiseAndUnknown: true,
-        overlapFactor: 0.50
-    });
+    }); 
 }
 
 // Function to map a score to a color
@@ -115,37 +125,6 @@ function scoreToColor(score) {
     const percent = score; // Assuming score is already normalized
     return percent > 0.5 ? '#ea234b' : '#d3d3d3';
 }
-
-/*
-// Function to initialize audio processing
-async function initAudio() {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    sampleRate = audioContext.sampleRate;
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    microphone = audioContext.createMediaStreamSource(stream);
-    analyser = audioContext.createAnalyser();
-    microphone.connect(analyser);
-    isListening = true;
-    processAudio();
-}
-
-// Function to process audio data
-function processAudio() {
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Float32Array(bufferLength);
-    //const dataArray = new Uint8Array(analyser.frequencyBinCount);
-    const process = () => {
-        if (!isListening) return; // Stop processing if not listening
-        requestAnimationFrame(process);
-        analyser.getFloatFrequencyData(dataArray);
-
-        //const features = extractFeatures(dataArray);
-        //updateMarkerPosition(features);
-        //checkProximity();
-    };
-    process();
-}
-*/
 
 // Function to initialize the plot with target and marker
 function initializePlot() {
@@ -172,18 +151,6 @@ function updateDisplay() {
         let targetPosition = { x: xSpacing * vowel.position.x + xSpacing/2 - markerRadius/2, y: ySpacing * vowel.position.y + ySpacing/2 - markerRadius/2 };
         createTargetCircle(vowel.vowel, targetPosition, '#d3d3d3', vowel.vowel === words[currentWordIndex].vowel ? '#ea234b' : '#d3d3d3');
     });
-    /*
-    vowels.forEach(vowel => {
-        let targetPosition = { x: xSpacing * vowel.position.x + xSpacing/2 - markerRadius/2, y: ySpacing * vowel.position.y + ySpacing/2 - markerRadius/2 };
-        if (vowel.vowel == currentVowel) {
-            createTargetCircle(vowel.vowel, targetPosition, currentTargetColor);            
-        } else {
-            createTargetCircle(vowel.vowel, targetPosition, defaultTargetColor);            
-        }
-    });*/
-
-    //let movingCircle = createCircle('moving-circle', 'moving circle', { x: initX, y: initY });
-    //plotArea.appendChild(movingCircle);
 
     // Update the image source
     let fixedImage = document.getElementById('word-image-fixed'); // Get the fixed image element
