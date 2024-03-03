@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<!-- Website that demonstrates formantanalyzer.js. -->
+<!-- See https://github.com/tabahi/formantanalyzer.js -->
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body class="w3-black">  
+    <div class="w3-container w3-bottombar w3-border-dark-gray"> <!-- Main body container -->
+        <div class="w3-row w3-center w3-animate-zoom" id="canvas_div">
+            <canvas id="SpectrumCanvas" width="800" height="300" ></canvas>
+        </div> 
+        <div class="w3-row w3-center">
+            <p id="msg">Press Mic</p>
+        </div>    
+        <div class="w3-row w3-center w3-padding-small">     <!-- Buttons -->
+            <div class="w3-col m2">
+                <input type="button" id="mic_button" value="Mic" class="w3-button w3-wide w3-border w3-border-amber w3-padding">
+            </div>
+        </div>
+    </div>  <!-- Main body container ends -->
+
+    <script src="https://unpkg.com/formantanalyzer@1.1.8/index.js"></script>
+    
+    <script>
+    
+    var play_status = { playing:false, files_processed:0, current_file_index:0, Source:1 };
+    var loaded_files = null;
+
+    function Configure_FormantAnalyzer() {
+        const BOX_HEIGHT = 600;
+        const BOX_WIDTH = window.screen.availWidth - 50; //reset the size of canvas element using the screen width
+        document.getElementById('SpectrumCanvas').width = BOX_WIDTH;
+        document.getElementById('SpectrumCanvas').height = BOX_HEIGHT;
+        
+        let launch_config = { plot_enable: true,
+        spec_type: 1,
+        output_level: 10, // 4 = Segment formants; 10 = Syllable formants
+        plot_len: 200,
+        f_min: 50,
+        f_max: 4000,
+        N_fft_bins: 256,
+        N_mel_bins: 128,
+        window_width: 25,
+        window_step: 15,
+        pause_length: 200,
+        min_seg_length: 500,
+        auto_noise_gate: true,
+        voiced_min_dB: 10,
+        voiced_max_dB: 100,
+        plot_lag: 1,
+        pre_norm_gain: 1000,
+        high_f_emph: 0.0,
+        plot_canvas: document.querySelector('#SpectrumCanvas').getContext('2d'),
+        canvas_width: BOX_WIDTH,
+        canvas_height: BOX_HEIGHT };
+
+        FormantAnalyzer.configure(launch_config);
+    }
+
+    /* This function is called asynchronously after each segment or syllable, 
+       depending on the output level, and returns an array of shape (steps, 9). 
+       output_level 4: Segment formants 
+       The 9 features include frequency, energy and bandwidth 
+       of the 3 most prominent formants at that particular window step. 
+       output_level 10: Syllable formants
+       The division and the length (total number of steps) is much shorter 
+       because syllables are separated by even minor pauses 
+       and other sudden shifts in formant frequency and energy. 
+    
+       https://github.com/tabahi/formantanalyzer.js output_level:
+       1 = Bars (no spectrum, only the last filter bank)
+       2 = Spectrum
+       3 = Segments
+       4 = Segment Formants / segment
+       5 = Segment Features 53x / segment [ML]
+       10 = Syllable Formants / syllable
+       11 = Distributions 264x / file [ML]
+       12 = Syllable Curves 23x / syllable [ML]
+       13 = Syllable Features 53x / syllable [ML]
+    */
+    async function call_backed(seg_index, seg_label, seg_time, extracted_features) {
+        //console.log(seg_index, seg_label, seg_time);
+        console.log("extracted_features: ", extracted_features);
+        return;
+    }
+    
+    document.querySelector('#mic_button').addEventListener('click', function(e) {
+        e.preventDefault();
+        play_status.Source = 3;
+        if(play_status.playing == false)
+        {
+            document.getElementById('msg').textContent = "Streaming from mic...";
+            
+            disable_buttons(true);
+            document.getElementById("mic_button").value = "...";
+            
+            document.getElementById("mic_button").value = "Stop";
+            document.getElementById("mic_button").disabled = false;
+            play_status.playing = true;
+            
+            Configure_FormantAnalyzer();
+            FormantAnalyzer.LaunchAudioNodes(3, null, call_backed, ['mic'], false, false, null, null).then(function()
+            {
+                stop_playing("End sop play");
+            }).catch((err)=>{
+                console.log(err);
+                stop_playing("Error during play start");
+                document.getElementById('msg').textContent = "Error streaming";
+            });   
+        }
+        else {
+            stop_playing("Button pressed");
+            document.getElementById('msg').textContent = "Stopped";
+        } 
+    });
+
+    function stop_playing(reason) {
+        play_status.playing = false;
+        FormantAnalyzer.StopAudioNodes(reason);
+        document.getElementById("mic_button").value = "Mic";
+        document.getElementById("mic_button").disabled = false;
+    }
+
+    function disable_buttons(disable) {
+        document.getElementById("mic_button").disabled = disable;
+    }
+
+    </script>  
+  </body>
+</html>

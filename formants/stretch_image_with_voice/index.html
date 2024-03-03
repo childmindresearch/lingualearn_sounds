@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<!-- Website that uses F1 and F2 to move a marker in a plot and stretch an image. -->
+<!-- python -m http.server -->
+<!-- http://localhost:8000 -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LinguaLearn</title>
+    <link rel="stylesheet" href="css/style.css"> <!-- Link to CSS file -->
+</head>
+<body>
+    <div id="header">
+        <img src="assets/CMI_logo.png" alt="Logo" id="logo">
+        <h1>LinguaLearn</h1>
+        <img src="assets/start.png" alt="Start Listening" id="start-button-img">
+    </div>
+    <div id="app">    
+        <div id="word-display">
+        </div>
+        <div id="plot-area">
+        </div>
+        <div id="image-container">
+            <img id="word-image-fixed" src="" alt="Word Image Fixed">
+            <img id="word-image-stretch" src="" alt="Word Image Stretch">
+        </div>
+    </div>
+    <script src="scripts/voice_features.js"></script>
+    <script src="scripts/formants_stretch_image.js"></script>
+</body>
+</html> 

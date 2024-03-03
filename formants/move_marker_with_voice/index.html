@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<!-- Website that moves a marker in a F1 x F2 plot. -->
+<!-- python -m http.server -->
+<!-- http://localhost:8000 -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LinguaLearn</title>
+    <link rel="stylesheet" href="css/style.css"> <!-- Link to CSS file -->
+</head>
+<body>
+    <div id="header">
+        <img src="assets/CMI_logo.png" alt="Logo" id="logo">
+        <h1>LinguaLearn</h1>
+        <img src="assets/start.png" alt="Start Listening" id="start-button-img">
+    </div>
+    <div id="app">    
+        <div id="word-display">
+        </div>
+        <div id="plot-area">
+        </div>
+        <div id="image-container">
+        </div>
+    </div>
+    <script src="scripts/voice_features.js"></script>
+    <script src="scripts/formants_move_marker.js"></script>
+</body>
+</html> 
