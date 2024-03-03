@@ -1,5 +1,7 @@
 // script.js
-// Script that uses tensorflow model outputs to move a marker in a plot and stretch an image.
+/* Script that uses tensorflow model to provide real-time feedback about pronunciation.
+   Feedback is in the form of modified plot markers and stretched images.
+*/
 
 // Define global variables
 let audioContext;
@@ -8,12 +10,6 @@ let microphone;
 let isListening = false;
 let currentWordIndex = -1;
 let markerRadius = 15; // copied from style.css
-let initX = -markerRadius;
-let initY = -markerRadius;
-let minX = -35;
-let maxX = -60;
-let minY = -5;
-let maxY = -60;
 let plotWidth = 800; // copied from style.css
 let plotHeight = 100; // copied from style.css
 let numberOfVerticalLines = 15;
@@ -138,8 +134,8 @@ function updateDisplay() {
     let currentWord = words[currentWordIndex].word;
     let currentVowel = words[currentWordIndex].vowel;
     let currentFormattedWord = words[currentWordIndex].format;
-    let defaultTargetColor = 'gray'; //#e4e4e4';
-    let currentTargetColor = 'red'; //#ea234b';
+    let defaultTargetColor = '#d3d3d3';
+    let currentTargetColor = '#ea234b';
     document.getElementById('word-display').innerHTML = currentFormattedWord;
 
     // Create target circles for all of the vowels
