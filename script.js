@@ -92,6 +92,7 @@ async function init() {
     });
 }
 
+/*
 // Function to initialize audio processing
 async function initAudio() {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -120,17 +121,6 @@ function processAudio() {
     };
     process();
 }
-
-// Feature extraction
-/*
-function extractFeatures(dataArray) {
-    const formants = extractFormants(dataArray, sampleRate); // formants
-    //console.log("F1: ", formants.F1.value)
-    //console.log("F2: ", formants.F2.value)    
-    const features = { x: formants.F1.value, y: formants.F2.value };
-    //console.log(features.x, features.y);
-    return features
-}
 */
 
 // Function to initialize the plot with target and marker
@@ -139,37 +129,33 @@ function initializePlot() {
     plotArea.innerHTML = ''; // Clear existing elements in the plot area
     drawGrid();
     //addAxisLabels();
-    
+}
+
+// Function to display the next word, etc.
+function updateDisplay() {
+    //currentWordIndex = Math.floor(Math.random() * words.length);
+    currentWordIndex = (currentWordIndex + 1) % words.length;
+    let currentWord = words[currentWordIndex].word;
+    let currentVowel = words[currentWordIndex].vowel;
+    let currentFormattedWord = words[currentWordIndex].format;
+    let defaultTargetColor = 'gray'; //#e4e4e4';
+    let currentTargetColor = 'red'; //#ea234b';
+    document.getElementById('word-display').innerHTML = currentFormattedWord;
+
+    // Create target circles for all of the vowels
     vowels.forEach(vowel => {
         // Use the position from the vowels array to position the circle
         let targetPosition = { x: xSpacing * vowel.position.x + xSpacing/2 - markerRadius/2, y: ySpacing * vowel.position.y + ySpacing/2 - markerRadius/2 };
-        createTargetCircle(vowel.vowel, targetPosition, 'gray'); // Initially, all circles are gray
+        if (vowel.vowel == currentVowel) {
+            createTargetCircle(vowel.vowel, targetPosition, currentTargetColor);            
+        } else {
+            createTargetCircle(vowel.vowel, targetPosition, defaultTargetColor);            
+        }
     });
 
     //let movingCircle = createCircle('moving-circle', 'moving circle', { x: initX, y: initY });
     //plotArea.appendChild(movingCircle);
-}
 
-// Function to create target circles
-function createTargetCircle(vowel, position, color) {
-    let circle = document.createElement('div');
-    circle.id = 'target-' + vowel; // Ensure unique ID
-    circle.className = 'target-circle';
-    circle.style.backgroundColor = color;
-    circle.style.left = position.x + 'px';
-    circle.style.top = position.y + 'px';
-    document.getElementById('plot-area').appendChild(circle);
-}
-
-// Function to display the next word
-function displayNextWord() {
-    //currentWordIndex = Math.floor(Math.random() * words.length);
-    currentWordIndex = (currentWordIndex + 1) % words.length;
-    let currentWord = words[currentWordIndex].word;
-    //let currentVowel = currentWord.vowel;
-    let currentFormattedWord = words[currentWordIndex].format;
-    document.getElementById('word-display').innerHTML = currentFormattedWord;
-    
     // Update the image source
     let fixedImage = document.getElementById('word-image-fixed'); // Get the fixed image element
     let stretchableImage = document.getElementById('word-image-stretch'); // Get the stretchable image element
@@ -182,6 +168,17 @@ function displayNextWord() {
     fixedImage.style.height = stretchableImage.style.height = imageSize + 'px';
 
     return vowels[currentWordIndex].position; // Return the position of the new word's vowel
+}
+
+// Function to create target circle
+function createTargetCircle(vowel, position, color) {
+    let circle = document.createElement('div');
+    circle.id = 'target-' + vowel; // Ensure unique ID
+    circle.className = 'target-circle';
+    circle.style.backgroundColor = color;
+    circle.style.left = position.x + 'px';
+    circle.style.top = position.y + 'px';
+    document.getElementById('plot-area').appendChild(circle);
 }
 
 // Function to update the marker position
@@ -255,7 +252,7 @@ function celebrateSuccess() {
     isListening = false; // Stop audio processing
     displayCelebratoryMessage();
     setTimeout(() => {
-        let position = displayNextWord();
+        let position = updateDisplay();
         initializePlot(xSpacing * position.x - xSpacing/2 - markerRadius, ySpacing * position.y - ySpacing/2 - markerRadius, initX, initY);
         isListening = true; // Restart audio processing
         processAudio();
@@ -338,8 +335,8 @@ function addAxisLabels() {
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
-    let position = displayNextWord();
     initializePlot();
+    let position = updateDisplay();
     document.getElementById('start-button-img').addEventListener('click', () => {
         /*
         if (!isListening) {
