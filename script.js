@@ -143,7 +143,6 @@ function initializePlot() {
     vowels.forEach(vowel => {
         // Use the position from the vowels array to position the circle
         let targetPosition = { x: xSpacing * vowel.position.x + xSpacing/2 - markerRadius/2, y: ySpacing * vowel.position.y + ySpacing/2 - markerRadius/2 };
-        console.log(targetPosition);
         createTargetCircle(vowel.vowel, targetPosition, 'gray'); // Initially, all circles are gray
     });
 
@@ -151,17 +150,6 @@ function initializePlot() {
     //plotArea.appendChild(movingCircle);
 }
 
-// Function to create a circle
-function createCircle(id, className, position) {
-    let circle = document.createElement('div');
-    circle.id = id;
-    circle.className = className;
-    if (position) {
-        circle.style.left = position.x + 'px';
-        circle.style.top = position.y + 'px';
-    }
-    return circle;
-}
 // Function to create target circles
 function createTargetCircle(vowel, position, color) {
     let circle = document.createElement('div');
@@ -170,7 +158,6 @@ function createTargetCircle(vowel, position, color) {
     circle.style.backgroundColor = color;
     circle.style.left = position.x + 'px';
     circle.style.top = position.y + 'px';
-    console.log(circle);
     document.getElementById('plot-area').appendChild(circle);
 }
 
@@ -178,25 +165,21 @@ function createTargetCircle(vowel, position, color) {
 function displayNextWord() {
     //currentWordIndex = Math.floor(Math.random() * words.length);
     currentWordIndex = (currentWordIndex + 1) % words.length;
-    let currentWord = words[currentWordIndex];
-    let currentVowel = currentWord.vowel;
-    let word = words[currentWordIndex].word;
-    let formattedWord = words[currentWordIndex].format;
-    document.getElementById('word-display').innerHTML = formattedWord;
+    let currentWord = words[currentWordIndex].word;
+    //let currentVowel = currentWord.vowel;
+    let currentFormattedWord = words[currentWordIndex].format;
+    document.getElementById('word-display').innerHTML = currentFormattedWord;
     
     // Update the image source
-    /*
     let fixedImage = document.getElementById('word-image-fixed'); // Get the fixed image element
     let stretchableImage = document.getElementById('word-image-stretch'); // Get the stretchable image element
     fixedImage.style.display = 'block'; // Set the display property to make it visible
     stretchableImage.style.display = 'block'; // Set the display property to make it visible
-    fixedImage.src = stretchableImage.src = 'assets/pictures/' + word + '.png'; // Set the source of the image
+    fixedImage.src = stretchableImage.src = 'assets/pictures/' + currentWord + '.png'; // Set the source of the image
 
     // Ensure both images start with the same size
     fixedImage.style.width = stretchableImage.style.width = imageSize + 'px';
-    //console.log('fixedImage.style.width', 'stretchableImage.style.width');
     fixedImage.style.height = stretchableImage.style.height = imageSize + 'px';
-    */
 
     return vowels[currentWordIndex].position; // Return the position of the new word's vowel
 }
