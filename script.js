@@ -120,10 +120,15 @@ async function init() {
 }
 
 // Function to map a score to a color
+// Interpolate between light gray for low score and red for high score
 function scoreToColor(score) {
-    // Interpolate between light gray for low score and red for high score
-    const percent = score; // Assuming score is already normalized
-    return percent > 0.5 ? '#ea234b' : '#d3d3d3';
+    // Convert score to a percentage
+    const percent = Math.max(0, Math.min(1, score)); // Ensure percent is between 0 and 1
+    const r = Math.floor((234 - 211) * percent + 211); // Interpolating R value
+    const g = Math.floor((35 - 211) * percent + 211);  // Interpolating G value
+    const b = Math.floor((75 - 211) * percent + 211);  // Interpolating B value
+    //console.log(score, r, g, b);
+    return `rgb(${r},${g},${b})`;
 }
 
 // Function to initialize the plot with target and marker
