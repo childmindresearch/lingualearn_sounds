@@ -1,4 +1,4 @@
-// stretch_image_with_formants.js
+// script.js
 // Script that uses tensorflow model outputs to move a marker in a plot and stretch an image.
 
 // Define global variables
@@ -92,8 +92,6 @@ async function init() {
     });
 }
 
-
-
 // Function to initialize audio processing
 async function initAudio() {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -116,14 +114,15 @@ function processAudio() {
         requestAnimationFrame(process);
         analyser.getFloatFrequencyData(dataArray);
 
-        const features = extractFeatures(dataArray);
-        updateMarkerPosition(features);
-        checkProximity();
+        //const features = extractFeatures(dataArray);
+        //updateMarkerPosition(features);
+        //checkProximity();
     };
     process();
 }
 
 // Feature extraction
+/*
 function extractFeatures(dataArray) {
     const formants = extractFormants(dataArray, sampleRate); // formants
     //console.log("F1: ", formants.F1.value)
@@ -132,23 +131,24 @@ function extractFeatures(dataArray) {
     //console.log(features.x, features.y);
     return features
 }
+*/
 
 // Function to initialize the plot with target and marker
-function initializePlot(target_x, target_y, moving_x, moving_y) {
+function initializePlot() {
     let plotArea = document.getElementById('plot-area');
-
-    // Clear existing elements in the plot area
-    while (plotArea.firstChild) {
-        plotArea.removeChild(plotArea.firstChild);
-    }
+    plotArea.innerHTML = ''; // Clear existing elements in the plot area
     drawGrid();
-    addAxisLabels();
+    //addAxisLabels();
+    
+    vowels.forEach(vowel => {
+        // Use the position from the vowels array to position the circle
+        let targetPosition = { x: xSpacing * vowel.position.x + xSpacing/2 - markerRadius/2, y: ySpacing * vowel.position.y + ySpacing/2 - markerRadius/2 };
+        console.log(targetPosition);
+        createTargetCircle(vowel.vowel, targetPosition, 'gray'); // Initially, all circles are gray
+    });
 
-    let targetCircle = createCircle('target-circle', 'target circle', { x: target_x, y: target_y });
-    let movingCircle = createCircle('moving-circle', 'moving circle', { x: moving_x, y: moving_y });
-
-    plotArea.appendChild(targetCircle);
-    plotArea.appendChild(movingCircle);
+    //let movingCircle = createCircle('moving-circle', 'moving circle', { x: initX, y: initY });
+    //plotArea.appendChild(movingCircle);
 }
 
 // Function to create a circle
@@ -162,16 +162,30 @@ function createCircle(id, className, position) {
     }
     return circle;
 }
+// Function to create target circles
+function createTargetCircle(vowel, position, color) {
+    let circle = document.createElement('div');
+    circle.id = 'target-' + vowel; // Ensure unique ID
+    circle.className = 'target-circle';
+    circle.style.backgroundColor = color;
+    circle.style.left = position.x + 'px';
+    circle.style.top = position.y + 'px';
+    console.log(circle);
+    document.getElementById('plot-area').appendChild(circle);
+}
 
 // Function to display the next word
 function displayNextWord() {
+    //currentWordIndex = Math.floor(Math.random() * words.length);
     currentWordIndex = (currentWordIndex + 1) % words.length;
-    //let currentWordIndex = Math.floor(Math.random() * words.length);
+    let currentWord = words[currentWordIndex];
+    let currentVowel = currentWord.vowel;
     let word = words[currentWordIndex].word;
     let formattedWord = words[currentWordIndex].format;
     document.getElementById('word-display').innerHTML = formattedWord;
     
     // Update the image source
+    /*
     let fixedImage = document.getElementById('word-image-fixed'); // Get the fixed image element
     let stretchableImage = document.getElementById('word-image-stretch'); // Get the stretchable image element
     fixedImage.style.display = 'block'; // Set the display property to make it visible
@@ -182,11 +196,13 @@ function displayNextWord() {
     fixedImage.style.width = stretchableImage.style.width = imageSize + 'px';
     //console.log('fixedImage.style.width', 'stretchableImage.style.width');
     fixedImage.style.height = stretchableImage.style.height = imageSize + 'px';
+    */
+
     return vowels[currentWordIndex].position; // Return the position of the new word's vowel
 }
 
 // Function to update the marker position
-function updateMarkerPosition(features) {
+/*function updateMarkerPosition(features) {
     // Normalize x and y values to fit within the plot area
     //console.log("features.x: ", features.x)
     //console.log("features.y: ", features.y)
@@ -288,6 +304,7 @@ function displayCelebratoryMessage() {
          confettiContainer.remove();
      }, 3000);
 }
+*/
 
 // Function to draw a grid
 function drawGrid() {
@@ -339,13 +356,14 @@ function addAxisLabels() {
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     let position = displayNextWord();
-    initializePlot(xSpacing * position.x + xSpacing/2 - markerRadius/2, ySpacing * position.y + ySpacing/2 - markerRadius/2, initX, initY);
+    initializePlot();
     document.getElementById('start-button-img').addEventListener('click', () => {
+        /*
         if (!isListening) {
             initAudio();
             let startButtonImg = document.getElementById('start-button-img');
             startButtonImg.style.visibility = 'hidden';
             startButtonImg.style.opacity = '0';
-        }
+        }*/
     });
 });

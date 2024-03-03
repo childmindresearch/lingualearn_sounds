@@ -81,8 +81,13 @@ body {
     border-radius: 50%;
     position: absolute;
 }
-#target-circle {
+
+.target-circle {
     background-color: #ea234b;
+    width: 15px; /* Set the width of the circle */
+    height: 15px; /* Set the height of the circle */
+    position: absolute; /* Ensure the circle positions correctly */
+    border-radius: 50%; /* Make the div circular */
 }
 #moving-circle {
     background-color: #00c1d5;
