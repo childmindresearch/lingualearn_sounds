@@ -9,7 +9,7 @@ let analyser;
 let microphone;
 let isListening = false;
 let currentWordIndex = -1;
-let markerRadius = 12; // copied from style.css
+let markerRadius = 11; // copied from style.css
 let plotWidth = 800; // copied from style.css
 let plotHeight = 100; // copied from style.css
 let numberOfVerticalLines = 15;
@@ -72,12 +72,12 @@ async function init() {
         return a.localeCompare(b); // Sort other labels alphabetically
     });
     
-    const labelContainer = document.getElementById("label-container");
+    /*const labelContainer = document.getElementById("label-container");
     for (let i = 0; i < classLabels.length; i++) {
         const labelDiv = document.createElement("div");
         labelDiv.style.fontSize = "12px"; // Smaller font size for predictions
         labelContainer.appendChild(labelDiv);
-    }
+    }*/
 
     // listen() takes two arguments:
     // 1. A callback function that is invoked anytime a word is recognized.
@@ -90,7 +90,7 @@ async function init() {
                 const score = result.scores[index];
                 targetCircle.style.backgroundColor = scoreToColor(score); // Fill color based on score
                 // Set border color based on current word's vowel
-                targetCircle.style.borderColor = vowel.vowel === words[currentWordIndex].vowel ? '#ea234b' : '#d3d3d3';
+                //targetCircle.style.borderColor = vowel.vowel === words[currentWordIndex].vowel ? '#ea234b' : '#d3d3d3';
             }
         });
         /*
@@ -170,12 +170,17 @@ function updateDisplay() {
     vowels.forEach(vowel => {
         // Use the position from the vowels array to position the circle
         let targetPosition = { x: xSpacing * vowel.position.x + xSpacing/2 - markerRadius/2, y: ySpacing * vowel.position.y + ySpacing/2 - markerRadius/2 };
+        createTargetCircle(vowel.vowel, targetPosition, '#d3d3d3', vowel.vowel === words[currentWordIndex].vowel ? '#ea234b' : '#d3d3d3');
+    });
+    /*
+    vowels.forEach(vowel => {
+        let targetPosition = { x: xSpacing * vowel.position.x + xSpacing/2 - markerRadius/2, y: ySpacing * vowel.position.y + ySpacing/2 - markerRadius/2 };
         if (vowel.vowel == currentVowel) {
             createTargetCircle(vowel.vowel, targetPosition, currentTargetColor);            
         } else {
             createTargetCircle(vowel.vowel, targetPosition, defaultTargetColor);            
         }
-    });
+    });*/
 
     //let movingCircle = createCircle('moving-circle', 'moving circle', { x: initX, y: initY });
     //plotArea.appendChild(movingCircle);
@@ -195,14 +200,19 @@ function updateDisplay() {
 }
 
 // Function to create target circle
-function createTargetCircle(vowel, position, color) {
-    let circle = document.createElement('div');
-    circle.id = 'target-' + vowel; // Ensure unique ID
-    circle.className = 'target-circle';
-    circle.style.backgroundColor = color;
-    circle.style.left = position.x + 'px';
-    circle.style.top = position.y + 'px';
-    document.getElementById('plot-area').appendChild(circle);
+function createTargetCircle(vowel, position, backgroundColor, borderColor) {
+    let targetCircle = document.getElementById('target-' + vowel);
+    if (!targetCircle) { // Create only if it doesn't exist
+        targetCircle = document.createElement('div');
+        targetCircle.id = 'target-' + vowel;
+        targetCircle.className = 'target-circle';
+        document.getElementById('plot-area').appendChild(targetCircle);
+    }
+    // Set or update the circle's styles
+    targetCircle.style.backgroundColor = backgroundColor;
+    targetCircle.style.borderColor = borderColor;
+    targetCircle.style.left = `${position.x}px`;
+    targetCircle.style.top = `${position.y}px`;
 }
 
 // Function to update the marker position
