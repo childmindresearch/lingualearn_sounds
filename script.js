@@ -17,6 +17,13 @@ let numberOfHorizontalLines = 7;
 let xSpacing = plotWidth / numberOfVerticalLines;
 let ySpacing = plotHeight / numberOfHorizontalLines;
 let imageSize = 400;
+let timeToCelebrate = 2000;
+let redColorHex = "#ea234b"; //"#a31c3f";
+let defaultFillColorHex = "#ffffff";
+let defaultBorderColorHex = "#d3d3d3";
+let redColorRGB = [234, 35, 75]; //[155, 34, 66];
+let defaultFillColorRGB = [255, 255, 255];
+let defaultBorderColorRGB = [211, 211, 211];
 const modelURL = "https://teachablemachine.withgoogle.com/models/g26KsVfaq/"; // Teachable Machine tensorflow model
 const sampleRate = 44100;
 
@@ -46,6 +53,7 @@ const vowels = [
     { vowel: "AO", position: { x: 14, y: 4 } } 
 ];
 
+// Function to create a tensorflow model
 // https://github.com/tensorflow/tfjs-models/tree/master/speech-commands
 async function createModel() {
     const checkpointURL = modelURL + "model.json"; // model topology
@@ -63,6 +71,7 @@ async function createModel() {
     return recognizer;
 }
 
+// Function to initialize audio capture
 async function init() {
     // Create an AudioContext with the desired sample rate.
     const audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: sampleRate });
@@ -84,14 +93,25 @@ async function init() {
         // 1. A callback function that is invoked anytime a word is recognized.
         // 2. A configuration object with adjustable fields
         recognizer.listen(result => {
+
+            // Iterate over vowels to update each marker's color based on the score
             vowels.forEach(vowel => {
                 const marker = document.getElementById('marker-' + vowel.vowel);
                 if (marker) {
-                    const index = classLabels.indexOf(vowel.vowel); // Assuming classLabels matches vowel.vowel
+                    const index = recognizer.wordLabels().indexOf(vowel.vowel);
                     const score = result.scores[index];
-                    marker.style.backgroundColor = scoreToColor(score); // Fill color based on score
+                    marker.style.backgroundColor = scoreToColor(score); // Update color based on score
                 }
             });
+
+            // If the highest score matches the current word's vowel, celebrate success
+            currentVowel = words[currentWordIndex].vowel;
+            const currentVowelIndex = recognizer.wordLabels().indexOf(currentVowel);
+            const currentVowelScore = result.scores[currentVowelIndex];
+            const successThreshold = 0.50; // Define a suitable threshold for success
+            const isHighestScore = currentVowelScore === Math.max(...result.scores);
+            const successConditionMet = currentVowelScore > successThreshold && isHighestScore;
+            handleResult(successConditionMet, currentVowel); // Process the result to handle specific logic
         }, {
             includeSpectrogram: true, // in case listen should return result.spectrogram
             probabilityThreshold: 0.75,
@@ -100,6 +120,22 @@ async function init() {
         });
     });
     const classLabels = recognizer.wordLabels(); // get class labels
+}
+
+// Function to extend celebration if condition successfully met
+async function handleResult(successConditionMet, currentVowel) {
+    // Logic to determine if the success condition is met
+    if (successConditionMet) {
+        const currentVowelMarker = document.getElementById('marker-' + currentVowel);
+        
+        // Temporarily set both border and fill to red
+        currentVowelMarker.style.backgroundColor = redColorHex;
+        currentVowelMarker.style.borderColor = redColorHex;
+
+        await celebrateAndDisplayMessage(currentVowelMarker); // Wait for celebration and message to complete
+
+        updateDisplay(); // Update the display for the next word
+    }
 }
 
 // Function to map a score to a color
@@ -115,15 +151,15 @@ function scoreToColor(score) {
     // Use an exponential function to amplify small scores
     const adjustedScore = Math.pow(percent, 0.5); // Adjust the exponent as needed
 
-    // Linear interpolation between light gray (211, 211, 211) and red (234, 35, 75)
-    const r = Math.floor((234 - 211) * adjustedScore + 211);
-    const g = Math.floor((35 - 211) * adjustedScore + 211);
-    const b = Math.floor((75 - 211) * adjustedScore + 211);
+    // Linear interpolation between defaultFillColorRGB and redColorRGB
+    const r = Math.floor((redColorRGB[0] - defaultFillColorRGB[0]) * adjustedScore + defaultFillColorRGB[0]);
+    const g = Math.floor((redColorRGB[1] - defaultFillColorRGB[1]) * adjustedScore + defaultFillColorRGB[1]);
+    const b = Math.floor((redColorRGB[2] - defaultFillColorRGB[2]) * adjustedScore + defaultFillColorRGB[2]);
 
     return `rgb(${r},${g},${b})`;
 }
 
-// Function to initialize the plot with markers
+// Function to initialize the plot
 function initializePlot() {
     let plotArea = document.getElementById('plot-area');
     plotArea.innerHTML = ''; // Clear existing elements in the plot area
@@ -131,7 +167,7 @@ function initializePlot() {
     //addAxisLabels();
 }
 
-// Function to display the next word, etc.
+// Function to update the display with the next word, markers, picture, etc.
 function updateDisplay() {
     //currentWordIndex = Math.floor(Math.random() * words.length);
     currentWordIndex = (currentWordIndex + 1) % words.length;
@@ -143,7 +179,7 @@ function updateDisplay() {
     vowels.forEach(vowel => {
         // Use the position from the vowels array to position the circle
         let markerPosition = { x: xSpacing * vowel.position.x + xSpacing/2 - markerRadius/2, y: ySpacing * vowel.position.y + ySpacing/2 - markerRadius/2 };
-        createMarker(vowel.vowel, markerPosition, '#d3d3d3', vowel.vowel === words[currentWordIndex].vowel ? '#ea234b' : '#d3d3d3');
+        createMarker(vowel.vowel, markerPosition, defaultFillColorHex, vowel.vowel === words[currentWordIndex].vowel ? redColorHex : defaultBorderColorHex);
     });
 
     // Update the image source
@@ -177,14 +213,14 @@ function createMarker(vowel, position, backgroundColor, borderColor) {
 }
 
 // Function to update the marker position
-/*function updateMarkerPosition(features) {
+function updateImage(position) {
     // Normalize x and y values to fit within the plot area
-    //console.log("features.x: ", features.x)
-    //console.log("features.y: ", features.y)
-    let normalizedX = normalizeValue(features.x, minX, maxX, 0, plotWidth);
-    let normalizedY = normalizeValue(features.y, minY, maxY, 0, plotHeight);
-    //console.log("normalizedX: ", normalizedX)
-    //console.log("normalizedY: ", normalizedY)
+    console.log("position.x: ", position.x)
+    console.log("position.y: ", position.y)
+    /*let normalizedX = normalizeValue(position.x, minX, maxX, 0, plotWidth);
+    let normalizedY = normalizeValue(position.y, minY, maxY, 0, plotHeight);
+    console.log("normalizedX: ", normalizedX)
+    console.log("normalizedY: ", normalizedY)
 
     // Update marker position
     let marker = document.getElementById('moving-circle');
@@ -200,6 +236,7 @@ function createMarker(vowel, position, backgroundColor, borderColor) {
     let stretchableImage = document.getElementById('word-image-stretch');
     stretchableImage.style.width = calculateImageWidth(normalizedX, markerX, imageSize, plotWidth) + 'px';
     stretchableImage.style.height = calculateImageHeight(normalizedY, markerY, imageSize, plotHeight) + 'px';
+    */
 }
 function normalizeValue(value, minInput, maxInput, minOutput, maxOutput) {
     // Normalize a value from one range to another
@@ -225,61 +262,33 @@ function calculateImageHeight(markerY, markerY, plotHeight) {
     return deltaY > 0 ? initialHeight * (1 + stretchFactorY) : initialHeight * (1 - stretchFactorY);
 }
 
-// Define a function to calculate the distance between two points
-function calculateDistance(pos1, pos2) {
-    return Math.sqrt(Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2));
-}
-// Modify the checkProximity function to include pausing and message display
-function checkProximity() {
-    let marker = document.getElementById('moving-circle');
-    let marker = document.getElementById('marker');
-    let markerPos = { x: parseInt(marker.style.left, 10), y: parseInt(marker.style.top, 10) };
-    let markerPos = { x: parseInt(marker.style.left, 10), y: parseInt(marker.style.top, 10) };
-    let distance = calculateDistance(markerPos, markerPos);
-    let proximityRadius = 20; // Radius
-    if (distance <= proximityRadius) {
-        celebrateSuccess();
-    }
-}
-
-// Modify the celebrateSuccess function
-function celebrateSuccess() {
-    isListening = false; // Stop audio processing
-    displayCelebratoryMessage();
-    setTimeout(() => {
-        let position = updateDisplay();
-        initializePlot(xSpacing * position.x - xSpacing/2 - markerRadius, ySpacing * position.y - ySpacing/2 - markerRadius, initX, initY);
-        isListening = true; // Restart audio processing
-        processAudio();
-    }, 1000); // Delay in ms
-}
-// Function to display a celebratory message
-function displayCelebratoryMessage() {
+// Combined function for celebrating success with audio and visual feedback
+async function celebrateAndDisplayMessage(currentVowelMarker) {
     // Play a sound
     var audio = new Audio('assets/yay.mp3'); // Replace with the path to your sound file
     audio.play();
 
-     // Create confetti container
-     let confettiContainer = document.createElement('div');
-     confettiContainer.id = 'confetti-container';
-     document.body.appendChild(confettiContainer);
+    // Create confetti container
+    let confettiContainer = document.createElement('div');
+    confettiContainer.id = 'confetti-container';
+    document.body.appendChild(confettiContainer);
  
-     // Generate confetti pieces
-     for (let i = 0; i < 50; i++) {
+    // Generate confetti pieces
+    for (let i = 0; i < 50; i++) {
          let confetti = document.createElement('div');
          confetti.className = 'confetti';
          confetti.style.left = `${Math.random() * 100}%`; // Randomize the initial horizontal position
          confetti.style.animationDelay = `${Math.random() * 2}s`; // Randomize the animation start time
          confetti.style.animationDuration = `${Math.random() * 3 + 2}s`; // Randomize the animation duration          confettiContainer.appendChild(confetti);
          confettiContainer.appendChild(confetti);
-        }
+    }
  
-     // Remove the confetti after 3 seconds
-     setTimeout(() => {
+    // Wait for the audio to finish and confetti to display before clearing
+    await new Promise(resolve => audio.onended = resolve);
+    setTimeout(() => {
          confettiContainer.remove();
-     }, 3000);
+    }, timeToCelebrate); // Adjust timeout to match the duration of the confetti animation
 }
-*/
 
 // Function to draw a grid
 function drawGrid() {
