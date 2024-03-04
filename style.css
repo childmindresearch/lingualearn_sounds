@@ -85,24 +85,21 @@ body {
 
 
 #image-container {
-    text-align: center; 
+    position: relative;
     margin-top: 20px;
-    position: relative; /* Container is relative for absolute children */
+    justify-content: center;
+    align-items: center;
+    width: 400px;
     height: 400px;
 }
-#word-image-fixed, #word-image-stretch {
+#image-fixed, #image-stretch {
     position: absolute;
+    top: 0;
+    width: 100%; /* Ensure it fills the container */
+    height: 100%; /* Ensure it fills the container */
     left: 50%;
-    transform: translateX(-50%);
-    bottom: 10px;
-    width: 100%; /* Start with fraction of container width */
-    height: 100%; /* Start with fraction of container height*/
+    /*transform: translateX(-50%);*/
 }
-#word-image-fixed {
-    max-width: 100%;
-    max-height: 100%;
-}
-
 
 #confetti-container {
     position: fixed;

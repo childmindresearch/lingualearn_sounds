@@ -4,9 +4,6 @@
 */
 
 // Define global variables
-//let audioContext;
-//let analyser;
-//let microphone;
 let isListening = false;
 let currentWordIndex = -1;
 let markerRadius = 11; // copied from style.css
@@ -29,11 +26,11 @@ const sampleRate = 44100;
 
 // Words
 const words = [
+    { word: "bot", format: "b<span class='highlighted'>o</span>t", vowel: "AA" },
+    { word: "bat", format: "b<span class='highlighted'>a</span>t", vowel: "AE" },
     { word: "beet", format: "b<span class='highlighted'>ee</span>t", vowel: "IY" }, 
     { word: "bit", format: "b<span class='highlighted'>i</span>t", vowel: "IH" }, 
     { word: "bet", format: "b<span class='highlighted'>e</span>t", vowel: "EH" },
-    { word: "bat", format: "b<span class='highlighted'>a</span>t", vowel: "AE" },
-    { word: "bot", format: "b<span class='highlighted'>o</span>t", vowel: "AA" },
     { word: "but", format: "b<span class='highlighted'>u</span>t", vowel: "AH" },
     { word: "book", format: "b<span class='highlighted'>oo</span>k", vowel: "UH" },
     { word: "boot", format: "b<span class='highlighted'>oo</span>t", vowel: "UW" },
@@ -42,11 +39,11 @@ const words = [
 
 // Vowels and their (zero-index) positions in the IPA chart
 const vowels = [
+    { vowel: "AA", position: { x: 6, y: 6 } },
+    { vowel: "AE", position: { x: 5, y: 5 } },
     { vowel: "IY", position: { x: 0, y: 0 } }, 
     { vowel: "IH", position: { x: 3, y: 1 } }, 
     { vowel: "EH", position: { x: 4, y: 4 } },
-    { vowel: "AE", position: { x: 5, y: 5 } },
-    { vowel: "AA", position: { x: 6, y: 6 } },
     { vowel: "AH", position: { x: 12, y: 4 } },
     { vowel: "UH", position: { x: 11, y: 1 } },
     { vowel: "UW", position: { x: 14, y: 0 } },
@@ -111,6 +108,9 @@ async function init() {
             const successThreshold = 0.50; // Define a suitable threshold for success
             const isHighestScore = currentVowelScore === Math.max(...result.scores);
             const successConditionMet = currentVowelScore > successThreshold && isHighestScore;
+
+            adjustImageScale(currentVowelScore, 'image-stretch');
+
             handleResult(successConditionMet, currentVowel); // Process the result to handle specific logic
         }, {
             includeSpectrogram: true, // in case listen should return result.spectrogram
@@ -138,18 +138,30 @@ async function handleResult(successConditionMet, currentVowel) {
     }
 }
 
-// Function to map a score to a color
-// Interpolate between light gray for low score and red for high score.
-// This function uses Math.pow(percent, 0.5) to apply a square root to the normalized score, 
-// which amplifies the impact of lower scores on the color gradient, making smaller scores 
-// more visible through more significant color changes. 
-// Adjust the exponent to control how much to amplify the lower scores.
-function scoreToColor(score) {
+// Function to normalize and adjust score
+// This function uses Math.pow(percent, 0.5) to apply a square root 
+// to the normalized score, which amplifies the impact of lower scores. 
+function adjustScore(score) {
     // Ensure score is between 0 and 1
-    const percent = Math.max(0, Math.min(1, score)); // Ensure percent is between 0 and 1
+    //const percent = Math.max(0, Math.min(1, score)); // Ensure percent is between 0 and 1
  
     // Use an exponential function to amplify small scores
-    const adjustedScore = Math.pow(percent, 0.5); // Adjust the exponent as needed
+    const adjustedScore = Math.pow(score, 0.5); // Adjust the exponent as needed
+
+    // Use a logistic function 
+    // This function is typically used in logistic regression and neural networks 
+    // for activation functions. The general form here is tweaked to adjust its output 
+    // towards 1 based on the input value.
+    //const adjustedScore = 1 - (1 / (1 + Math.exp(-10 * (score - 0.5))));
+
+    return adjustedScore;
+}
+
+// Function to map a score to a color
+// Interpolate between light gray for low score and red for high score.
+function scoreToColor(score) {
+    
+    let adjustedScore = adjustScore(score);
 
     // Linear interpolation between defaultFillColorRGB and redColorRGB
     const r = Math.floor((redColorRGB[0] - defaultFillColorRGB[0]) * adjustedScore + defaultFillColorRGB[0]);
@@ -183,8 +195,8 @@ function updateDisplay() {
     });
 
     // Update the image source
-    let fixedImage = document.getElementById('word-image-fixed'); // Get the fixed image element
-    let stretchableImage = document.getElementById('word-image-stretch'); // Get the stretchable image element
+    let fixedImage = document.getElementById('image-fixed'); // Get the fixed image element
+    let stretchableImage = document.getElementById('image-stretch'); // Get the stretchable image element
     fixedImage.style.display = 'block'; // Set the display property to make it visible
     stretchableImage.style.display = 'block'; // Set the display property to make it visible
     fixedImage.src = stretchableImage.src = 'assets/pictures/' + currentWord + '.png'; // Set the source of the image
@@ -212,54 +224,15 @@ function createMarker(vowel, position, backgroundColor, borderColor) {
     marker.style.top = `${position.y}px`;
 }
 
-// Function to update the marker position
-function updateImage(position) {
-    // Normalize x and y values to fit within the plot area
-    console.log("position.x: ", position.x)
-    console.log("position.y: ", position.y)
-    /*let normalizedX = normalizeValue(position.x, minX, maxX, 0, plotWidth);
-    let normalizedY = normalizeValue(position.y, minY, maxY, 0, plotHeight);
-    console.log("normalizedX: ", normalizedX)
-    console.log("normalizedY: ", normalizedY)
+// Function to adjust the scale of the image based on proximity to score
+function adjustImageScale(score, imageId) {
+    const image = document.getElementById(imageId);
 
-    // Update marker position
-    let marker = document.getElementById('moving-circle');
-    marker.style.left = normalizedX + 'px';
-    marker.style.top = normalizedY + 'px';
-
-    // Get marker position
-    let marker = document.getElementById('marker');
-    let markerX = parseInt(marker.style.left, 10);
-    let markerY = parseInt(marker.style.top, 10);
-
-    // Update stretching image size based on marker position
-    let stretchableImage = document.getElementById('word-image-stretch');
-    stretchableImage.style.width = calculateImageWidth(normalizedX, markerX, imageSize, plotWidth) + 'px';
-    stretchableImage.style.height = calculateImageHeight(normalizedY, markerY, imageSize, plotHeight) + 'px';
-    */
-}
-function normalizeValue(value, minInput, maxInput, minOutput, maxOutput) {
-    // Normalize a value from one range to another
-    return ((value - minInput) / (maxInput - minInput)) * (maxOutput - minOutput) + minOutput;
-}
-
-function calculateImageWidth(markerX, markerX, plotWidth) {
-    let deltaX = markerX - markerX;
-    let initialWidth = imageSize;
-    let stretchFactorX = Math.abs(deltaX) / (plotWidth / 2); // Factor by which to stretch
-    console.log(stretchFactorX);
-
-    // Expand or contract based on marker position relative to marker
-    return deltaX > 0 ? initialWidth * (1 + stretchFactorX) : initialWidth * (1 - stretchFactorX);
-}
-
-function calculateImageHeight(markerY, markerY, plotHeight) {
-    let deltaY = markerY - markerY;
-    let initialHeight = imageSize;
-    let stretchFactorY = Math.abs(deltaY) / (plotHeight / 2); // Factor by which to stretch
-
-    // Expand or contract based on marker position relative to marker
-    return deltaY > 0 ? initialHeight * (1 + stretchFactorY) : initialHeight * (1 - stretchFactorY);
+    let adjustedScore = adjustScore(score);
+    console.log('score: ', score);
+    console.log('adjustedScore: ', adjustedScore);
+    const scaleFactor = adjustedScore; // Adjust based on score
+    image.style.transform = `scale(${scaleFactor}, ${scaleFactor})`;
 }
 
 // Combined function for celebrating success with audio and visual feedback
