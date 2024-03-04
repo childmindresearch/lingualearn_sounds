@@ -103,18 +103,27 @@ async function init() {
 }
 
 // Function to map a score to a color
-// Interpolate between light gray for low score and red for high score
+// Interpolate between light gray for low score and red for high score.
+// This function uses Math.pow(percent, 0.5) to apply a square root to the normalized score, 
+// which amplifies the impact of lower scores on the color gradient, making smaller scores 
+// more visible through more significant color changes. 
+// Adjust the exponent to control how much to amplify the lower scores.
 function scoreToColor(score) {
-    // Convert score to a percentage
+    // Ensure score is between 0 and 1
     const percent = Math.max(0, Math.min(1, score)); // Ensure percent is between 0 and 1
-    const r = Math.floor((234 - 211) * percent + 211); // Interpolating R value
-    const g = Math.floor((35 - 211) * percent + 211);  // Interpolating G value
-    const b = Math.floor((75 - 211) * percent + 211);  // Interpolating B value
-    //console.log(score, r, g, b);
+ 
+    // Use an exponential function to amplify small scores
+    const adjustedScore = Math.pow(percent, 0.5); // Adjust the exponent as needed
+
+    // Linear interpolation between light gray (211, 211, 211) and red (234, 35, 75)
+    const r = Math.floor((234 - 211) * adjustedScore + 211);
+    const g = Math.floor((35 - 211) * adjustedScore + 211);
+    const b = Math.floor((75 - 211) * adjustedScore + 211);
+
     return `rgb(${r},${g},${b})`;
 }
 
-// Function to initialize the plot with marker and marker
+// Function to initialize the plot with markers
 function initializePlot() {
     let plotArea = document.getElementById('plot-area');
     plotArea.innerHTML = ''; // Clear existing elements in the plot area
