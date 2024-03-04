@@ -85,23 +85,13 @@ async function init() {
         // 2. A configuration object with adjustable fields
         recognizer.listen(result => {
             vowels.forEach(vowel => {
-                const targetCircle = document.getElementById('target-' + vowel.vowel);
-                if (targetCircle) {
+                const marker = document.getElementById('marker-' + vowel.vowel);
+                if (marker) {
                     const index = classLabels.indexOf(vowel.vowel); // Assuming classLabels matches vowel.vowel
                     const score = result.scores[index];
-                    targetCircle.style.backgroundColor = scoreToColor(score); // Fill color based on score
-                    // Set border color based on current word's vowel
-                    //targetCircle.style.borderColor = vowel.vowel === words[currentWordIndex].vowel ? '#ea234b' : '#d3d3d3';
+                    marker.style.backgroundColor = scoreToColor(score); // Fill color based on score
                 }
             });
-            /*
-            const scores = result.scores; // probability of prediction for each class
-            // render the probability scores per class
-            for (let i = 0; i < classLabels.length; i++) {
-                const classPrediction = classLabels[i] + ": " + result.scores[i].toFixed(2);
-                labelContainer.childNodes[i].innerHTML = classPrediction;
-            }
-            */
         }, {
             includeSpectrogram: true, // in case listen should return result.spectrogram
             probabilityThreshold: 0.75,
@@ -109,14 +99,7 @@ async function init() {
             overlapFactor: 0.50
         });
     });
-
     const classLabels = recognizer.wordLabels(); // get class labels
-    // Sort classLabels, with Background at the bottom
-    classLabels.sort((a, b) => {
-        if(a === "Background") return 1;
-        if(b === "Background") return -1;
-        return a.localeCompare(b); // Sort other labels alphabetically
-    }); 
 }
 
 // Function to map a score to a color
@@ -131,7 +114,7 @@ function scoreToColor(score) {
     return `rgb(${r},${g},${b})`;
 }
 
-// Function to initialize the plot with target and marker
+// Function to initialize the plot with marker and marker
 function initializePlot() {
     let plotArea = document.getElementById('plot-area');
     plotArea.innerHTML = ''; // Clear existing elements in the plot area
@@ -144,17 +127,14 @@ function updateDisplay() {
     //currentWordIndex = Math.floor(Math.random() * words.length);
     currentWordIndex = (currentWordIndex + 1) % words.length;
     let currentWord = words[currentWordIndex].word;
-    let currentVowel = words[currentWordIndex].vowel;
     let currentFormattedWord = words[currentWordIndex].format;
-    let defaultTargetColor = '#d3d3d3';
-    let currentTargetColor = '#ea234b';
     document.getElementById('word-display').innerHTML = currentFormattedWord;
 
-    // Create target circles for all of the vowels
+    // Create markers for all of the vowels
     vowels.forEach(vowel => {
         // Use the position from the vowels array to position the circle
-        let targetPosition = { x: xSpacing * vowel.position.x + xSpacing/2 - markerRadius/2, y: ySpacing * vowel.position.y + ySpacing/2 - markerRadius/2 };
-        createTargetCircle(vowel.vowel, targetPosition, '#d3d3d3', vowel.vowel === words[currentWordIndex].vowel ? '#ea234b' : '#d3d3d3');
+        let markerPosition = { x: xSpacing * vowel.position.x + xSpacing/2 - markerRadius/2, y: ySpacing * vowel.position.y + ySpacing/2 - markerRadius/2 };
+        createMarker(vowel.vowel, markerPosition, '#d3d3d3', vowel.vowel === words[currentWordIndex].vowel ? '#ea234b' : '#d3d3d3');
     });
 
     // Update the image source
@@ -171,20 +151,20 @@ function updateDisplay() {
     return vowels[currentWordIndex].position; // Return the position of the new word's vowel
 }
 
-// Function to create target circle
-function createTargetCircle(vowel, position, backgroundColor, borderColor) {
-    let targetCircle = document.getElementById('target-' + vowel);
-    if (!targetCircle) { // Create only if it doesn't exist
-        targetCircle = document.createElement('div');
-        targetCircle.id = 'target-' + vowel;
-        targetCircle.className = 'target-circle';
-        document.getElementById('plot-area').appendChild(targetCircle);
+// Function to create marker
+function createMarker(vowel, position, backgroundColor, borderColor) {
+    let marker = document.getElementById('marker-' + vowel);
+    if (!marker) { // Create only if it doesn't exist
+        marker = document.createElement('div');
+        marker.id = 'marker-' + vowel;
+        marker.className = 'marker';
+        document.getElementById('plot-area').appendChild(marker);
     }
-    // Set or update the circle's styles
-    targetCircle.style.backgroundColor = backgroundColor;
-    targetCircle.style.borderColor = borderColor;
-    targetCircle.style.left = `${position.x}px`;
-    targetCircle.style.top = `${position.y}px`;
+    // Set or update the marker's styles
+    marker.style.backgroundColor = backgroundColor;
+    marker.style.borderColor = borderColor;
+    marker.style.left = `${position.x}px`;
+    marker.style.top = `${position.y}px`;
 }
 
 // Function to update the marker position
@@ -202,37 +182,37 @@ function createTargetCircle(vowel, position, backgroundColor, borderColor) {
     marker.style.left = normalizedX + 'px';
     marker.style.top = normalizedY + 'px';
 
-    // Get target position
-    let target = document.getElementById('target-circle');
-    let targetX = parseInt(target.style.left, 10);
-    let targetY = parseInt(target.style.top, 10);
+    // Get marker position
+    let marker = document.getElementById('marker');
+    let markerX = parseInt(marker.style.left, 10);
+    let markerY = parseInt(marker.style.top, 10);
 
     // Update stretching image size based on marker position
     let stretchableImage = document.getElementById('word-image-stretch');
-    stretchableImage.style.width = calculateImageWidth(normalizedX, targetX, imageSize, plotWidth) + 'px';
-    stretchableImage.style.height = calculateImageHeight(normalizedY, targetY, imageSize, plotHeight) + 'px';
+    stretchableImage.style.width = calculateImageWidth(normalizedX, markerX, imageSize, plotWidth) + 'px';
+    stretchableImage.style.height = calculateImageHeight(normalizedY, markerY, imageSize, plotHeight) + 'px';
 }
 function normalizeValue(value, minInput, maxInput, minOutput, maxOutput) {
     // Normalize a value from one range to another
     return ((value - minInput) / (maxInput - minInput)) * (maxOutput - minOutput) + minOutput;
 }
 
-function calculateImageWidth(markerX, targetX, plotWidth) {
-    let deltaX = markerX - targetX;
+function calculateImageWidth(markerX, markerX, plotWidth) {
+    let deltaX = markerX - markerX;
     let initialWidth = imageSize;
     let stretchFactorX = Math.abs(deltaX) / (plotWidth / 2); // Factor by which to stretch
     console.log(stretchFactorX);
 
-    // Expand or contract based on marker position relative to target
+    // Expand or contract based on marker position relative to marker
     return deltaX > 0 ? initialWidth * (1 + stretchFactorX) : initialWidth * (1 - stretchFactorX);
 }
 
-function calculateImageHeight(markerY, targetY, plotHeight) {
-    let deltaY = markerY - targetY;
+function calculateImageHeight(markerY, markerY, plotHeight) {
+    let deltaY = markerY - markerY;
     let initialHeight = imageSize;
     let stretchFactorY = Math.abs(deltaY) / (plotHeight / 2); // Factor by which to stretch
 
-    // Expand or contract based on marker position relative to target
+    // Expand or contract based on marker position relative to marker
     return deltaY > 0 ? initialHeight * (1 + stretchFactorY) : initialHeight * (1 - stretchFactorY);
 }
 
@@ -243,10 +223,10 @@ function calculateDistance(pos1, pos2) {
 // Modify the checkProximity function to include pausing and message display
 function checkProximity() {
     let marker = document.getElementById('moving-circle');
-    let target = document.getElementById('target-circle');
+    let marker = document.getElementById('marker');
     let markerPos = { x: parseInt(marker.style.left, 10), y: parseInt(marker.style.top, 10) };
-    let targetPos = { x: parseInt(target.style.left, 10), y: parseInt(target.style.top, 10) };
-    let distance = calculateDistance(markerPos, targetPos);
+    let markerPos = { x: parseInt(marker.style.left, 10), y: parseInt(marker.style.top, 10) };
+    let distance = calculateDistance(markerPos, markerPos);
     let proximityRadius = 20; // Radius
     if (distance <= proximityRadius) {
         celebrateSuccess();

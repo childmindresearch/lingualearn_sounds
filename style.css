@@ -75,16 +75,12 @@ body {
 }
 
 
-.target-circle {
+.marker {
     width: 8px; /* Set the width of the circle */
     height: 8px; /* Set the height of the circle */
     border-radius: 50%; /* Make the div circular */
-    border: 2px solid; /* Default border color */
     border: 2px solid #d3d3d3; /* Default border color */
     position: absolute; /* Ensure the circle positions correctly */
-}
-#moving-circle {
-    background-color: #00c1d5;
 }
 
 
