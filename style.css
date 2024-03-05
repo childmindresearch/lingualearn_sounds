@@ -144,3 +144,20 @@ body {
         height: 30px;
     }  
 }
+
+/*
+Notes for scaling in mobile devices:
+
+Aspect Ratio Boxes: For non-image elements where aspect ratio needs to be maintained, 
+consider using a wrapping element with a percentage-based padding top, 
+which is a common technique for creating aspect-ratio boxes.
+
+Responsive Font Sizes: For text (like your word display), 
+consider using vw units for font sizes to ensure the text scales 
+with the viewport width, making it legible across devices.
+
+Testing and Adjustment: The specific values (like 90vw, 80vh, 6vw, etc.) 
+should be adjusted based on your specific layout, content, and design needs. 
+It's important to test these styles across different devices 
+to ensure the desired appearance and functionality.
+*/

@@ -19,7 +19,7 @@ const modelURL = "https://teachablemachine.withgoogle.com/models/g26KsVfaq/"; //
 const sampleRate = 44100;
 let isListening = false;
 let currentWordIndex = -1;
-let timeToCelebrate = 1000;
+let timeToCelebrate = 2000;
 
 // Words
 const words = [
@@ -198,11 +198,13 @@ async function celebrateAndDisplayMessage() {
          confettiContainer.appendChild(confetti);
     }
  
-    // Wait for the audio to finish and confetti to display before clearing
-    await new Promise(resolve => audio.onended = resolve);
-    setTimeout(() => {
-         confettiContainer.remove();
-    }, timeToCelebrate); // Adjust timeout to match the duration of the confetti animation
+    // Wait for the confetti to display before clearing
+    await new Promise(resolve => setTimeout(resolve, timeToCelebrate)); // Adjust timeout to match the duration of the confetti animation
+    confettiContainer.remove();
+    
+    // Updata display (image, word, grid colors)
+    updateDisplay();
+
 }
 
 // Initialize the application
@@ -274,7 +276,10 @@ function updateDisplay() {
     let stretchableImage = document.getElementById('image-stretch'); // Get the stretchable image element
     fixedImage.style.display = 'block'; // Set the display property to make it visible
     stretchableImage.style.display = 'block'; // Set the display property to make it visible
-    fixedImage.src = stretchableImage.src = 'assets/pictures/' + currentWord + '.png'; // Set the source of the image
+    //fixedImage.src = stretchableImage.src = 'assets/pictures/' + currentWord + '.png'; // Set the source of the image
+    fixedImage.src = stretchableImage.src = 'assets/pictures/' + currentWord + '.png' + '?v=' + new Date().getTime();
+
+    console.log(fixedImage.src);
 
     // Ensure both images start with the same size
     fixedImage.style.width = stretchableImage.style.width = imageSize + 'px';
