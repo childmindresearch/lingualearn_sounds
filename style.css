@@ -32,12 +32,14 @@ body {
     text-align: center;
     background-color: #f0f0f0;
 }
-#app {
-    margin: 0 auto;
-    width: 800px;
-    padding: 0px;
-}
 
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    /* height: 100vh; /* This makes sure it takes the full viewport height */
+}
 
 #word-display {
     font-size: 80px;
@@ -48,57 +50,31 @@ body {
 }
 
 
-#plot-area {
-    width: 800px;
-    height: 100px;
-    border: 1px solid #000;
-    position: relative;
-    margin-bottom: 0px;
+#grid-area {
+    display: grid;
+    grid-template-columns: repeat(8, 20px); /* Creates 8 columns, each 20px wide */
+    grid-template-rows: repeat(5, 20px); /* Creates 5 rows, each 20px high */
+    gap: 1px; /* Optional: Adds a gap between cells */
 }
-.grid-line {
-    position: absolute;
-    background-color: #c8c8c8; /* Grid line color */
+.grid-cell {
+    width: 100%; /* Fills the cell */
+    height: 100%;
+    border: 1px solid lightgray; /* Optional */
 }
-.vertical {
-    width: 1px; /* Vertical line thickness */
-    height: 100%; /* Full height of the plot area */
-}
-.horizontal {
-    height: 1px; /* Horizontal line thickness */
-    width: 100%; /* Full width of the plot area */
-}
-.axis-label {
-    position: absolute;
-    font-size: 12px;
-    color: slategray; /* Label text color */
-    padding: 4px;
-}
-
-
-.marker {
-    width: 8px; /* Set the width of the circle */
-    height: 8px; /* Set the height of the circle */
-    border-radius: 50%; /* Make the div circular */
-    border: 2px solid #d3d3d3; /* Default border color */
-    position: absolute; /* Ensure the circle positions correctly */
-}
-
 
 #image-container {
     position: relative;
     margin-top: 20px;
     justify-content: center;
     align-items: center;
-    width: 400px;
-    height: 400px;
+    width: 100px;
+    height: 100px;
 }
 #image-fixed, #image-stretch {
     position: absolute;
     top: 0;
     width: 100%; /* Ensure it fills the container */
     height: 100%; /* Ensure it fills the container */
-    left: 50%;
-    /*transform: translateX(-50%);*/
 }
 
 #confetti-container {

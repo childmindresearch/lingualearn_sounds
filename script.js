@@ -6,15 +6,14 @@
 // Define global variables
 let isListening = false;
 let currentWordIndex = -1;
-let markerRadius = 11; // copied from style.css
-let plotWidth = 800; // copied from style.css
-let plotHeight = 100; // copied from style.css
-let numberOfVerticalLines = 15;
-let numberOfHorizontalLines = 7;
-let xSpacing = plotWidth / numberOfVerticalLines;
-let ySpacing = plotHeight / numberOfHorizontalLines;
-let imageSize = 400;
-let timeToCelebrate = 2000;
+//let plotWidth = 800; // copied from style.css
+//let plotHeight = 500; // copied from style.css
+let numHorizontalCells = 8;
+let numVerticalCells = 5;
+let cellWidth = 20; 
+let cellHeight = 20;
+let imageSize = 100;
+let timeToCelebrate = 1000;
 let redColorHex = "#ea234b"; //"#a31c3f";
 let defaultFillColorHex = "#ffffff";
 let defaultBorderColorHex = "#d3d3d3";
@@ -27,27 +26,27 @@ const sampleRate = 44100;
 // Words
 const words = [
     { word: "bot", format: "b<span class='highlighted'>o</span>t", vowel: "AA" },
-    { word: "bat", format: "b<span class='highlighted'>a</span>t", vowel: "AE" },
     { word: "beet", format: "b<span class='highlighted'>ee</span>t", vowel: "IY" }, 
     { word: "bit", format: "b<span class='highlighted'>i</span>t", vowel: "IH" }, 
     { word: "bet", format: "b<span class='highlighted'>e</span>t", vowel: "EH" },
-    { word: "but", format: "b<span class='highlighted'>u</span>t", vowel: "AH" },
+    { word: "bat", format: "b<span class='highlighted'>a</span>t", vowel: "AE" },
     { word: "book", format: "b<span class='highlighted'>oo</span>k", vowel: "UH" },
+    { word: "but", format: "b<span class='highlighted'>u</span>t", vowel: "AH" },
     { word: "boot", format: "b<span class='highlighted'>oo</span>t", vowel: "UW" },
     { word: "bought", format: "b<span class='highlighted'>ough</span>t", vowel: "AO" } 
 ];
 
 // Vowels and their (zero-index) positions in the IPA chart
 const vowels = [
-    { vowel: "AA", position: { x: 6, y: 6 } },
-    { vowel: "AE", position: { x: 5, y: 5 } },
+    { vowel: "AA", position: { x: 4, y: 4 } },
     { vowel: "IY", position: { x: 0, y: 0 } }, 
-    { vowel: "IH", position: { x: 3, y: 1 } }, 
-    { vowel: "EH", position: { x: 4, y: 4 } },
-    { vowel: "AH", position: { x: 12, y: 4 } },
-    { vowel: "UH", position: { x: 11, y: 1 } },
-    { vowel: "UW", position: { x: 14, y: 0 } },
-    { vowel: "AO", position: { x: 14, y: 4 } } 
+    { vowel: "IH", position: { x: 1, y: 1 } }, 
+    { vowel: "EH", position: { x: 2, y: 2 } },
+    { vowel: "AE", position: { x: 3, y: 3 } },
+    { vowel: "UH", position: { x: 5, y: 1 } },
+    { vowel: "AH", position: { x: 6, y: 2 } },
+    { vowel: "UW", position: { x: 7, y: 0 } },
+    { vowel: "AO", position: { x: 7, y: 2 } } 
 ];
 
 // Function to create a tensorflow model
@@ -93,12 +92,10 @@ async function init() {
 
             // Iterate over vowels to update each marker's color based on the score
             vowels.forEach(vowel => {
-                const marker = document.getElementById('marker-' + vowel.vowel);
-                if (marker) {
-                    const index = recognizer.wordLabels().indexOf(vowel.vowel);
-                    const score = result.scores[index];
-                    marker.style.backgroundColor = scoreToColor(score); // Update color based on score
-                }
+                // Use the position from the vowels array to color the grid cells
+                const index = recognizer.wordLabels().indexOf(vowel.vowel);
+                const score = result.scores[index];
+                updateCellColor(vowel.position.x, vowel.position.y, scoreToColor(score), vowel.vowel === words[currentWordIndex].vowel ? redColorHex : defaultBorderColorHex);
             });
 
             // If the highest score matches the current word's vowel, celebrate success
@@ -119,23 +116,23 @@ async function init() {
             overlapFactor: 0.50
         });
     });
-    const classLabels = recognizer.wordLabels(); // get class labels
+    //const classLabels = recognizer.wordLabels(); // get class labels
 }
 
 // Function to extend celebration if condition successfully met
 async function handleResult(successConditionMet, currentVowel) {
     // Logic to determine if the success condition is met
     if (successConditionMet) {
-        const currentVowelMarker = document.getElementById('marker-' + currentVowel);
-        
-        // Temporarily set both border and fill to red
-        currentVowelMarker.style.backgroundColor = redColorHex;
-        currentVowelMarker.style.borderColor = redColorHex;
-
-        await celebrateAndDisplayMessage(currentVowelMarker); // Wait for celebration and message to complete
-
-        updateDisplay(); // Update the display for the next word
-    }
+        // Find the vowel's position in the grid
+        const vowelInfo = vowels.find(vowel => vowel.vowel === currentVowel);
+        if (vowelInfo) {
+            // Update the grid cell's color based on the vowel position
+            updateCellColor(vowelInfo.position.x, vowelInfo.position.y, redColorHex, redColorHex);
+        }
+        // Additional logic for celebration and display updates
+        await celebrateAndDisplayMessage(); // Assuming this function handles celebration visuals or messages
+        updateDisplay(); // Update the display for the next word or state
+    }       
 }
 
 // Function to normalize and adjust score
@@ -171,72 +168,19 @@ function scoreToColor(score) {
     return `rgb(${r},${g},${b})`;
 }
 
-// Function to initialize the plot
-function initializePlot() {
-    let plotArea = document.getElementById('plot-area');
-    plotArea.innerHTML = ''; // Clear existing elements in the plot area
-    drawGrid();
-    //addAxisLabels();
-}
-
-// Function to update the display with the next word, markers, picture, etc.
-function updateDisplay() {
-    //currentWordIndex = Math.floor(Math.random() * words.length);
-    currentWordIndex = (currentWordIndex + 1) % words.length;
-    let currentWord = words[currentWordIndex].word;
-    let currentFormattedWord = words[currentWordIndex].format;
-    document.getElementById('word-display').innerHTML = currentFormattedWord;
-
-    // Create markers for all of the vowels
-    vowels.forEach(vowel => {
-        // Use the position from the vowels array to position the circle
-        let markerPosition = { x: xSpacing * vowel.position.x + xSpacing/2 - markerRadius/2, y: ySpacing * vowel.position.y + ySpacing/2 - markerRadius/2 };
-        createMarker(vowel.vowel, markerPosition, defaultFillColorHex, vowel.vowel === words[currentWordIndex].vowel ? redColorHex : defaultBorderColorHex);
-    });
-
-    // Update the image source
-    let fixedImage = document.getElementById('image-fixed'); // Get the fixed image element
-    let stretchableImage = document.getElementById('image-stretch'); // Get the stretchable image element
-    fixedImage.style.display = 'block'; // Set the display property to make it visible
-    stretchableImage.style.display = 'block'; // Set the display property to make it visible
-    fixedImage.src = stretchableImage.src = 'assets/pictures/' + currentWord + '.png'; // Set the source of the image
-
-    // Ensure both images start with the same size
-    fixedImage.style.width = stretchableImage.style.width = imageSize + 'px';
-    fixedImage.style.height = stretchableImage.style.height = imageSize + 'px';
-
-    return vowels[currentWordIndex].position; // Return the position of the new word's vowel
-}
-
-// Function to create marker
-function createMarker(vowel, position, backgroundColor, borderColor) {
-    let marker = document.getElementById('marker-' + vowel);
-    if (!marker) { // Create only if it doesn't exist
-        marker = document.createElement('div');
-        marker.id = 'marker-' + vowel;
-        marker.className = 'marker';
-        document.getElementById('plot-area').appendChild(marker);
-    }
-    // Set or update the marker's styles
-    marker.style.backgroundColor = backgroundColor;
-    marker.style.borderColor = borderColor;
-    marker.style.left = `${position.x}px`;
-    marker.style.top = `${position.y}px`;
-}
-
 // Function to adjust the scale of the image based on proximity to score
 function adjustImageScale(score, imageId) {
     const image = document.getElementById(imageId);
 
     let adjustedScore = adjustScore(score);
-    console.log('score: ', score);
-    console.log('adjustedScore: ', adjustedScore);
+    //console.log('score: ', score);
+    //console.log('adjustedScore: ', adjustedScore);
     const scaleFactor = adjustedScore; // Adjust based on score
     image.style.transform = `scale(${scaleFactor}, ${scaleFactor})`;
 }
 
 // Combined function for celebrating success with audio and visual feedback
-async function celebrateAndDisplayMessage(currentVowelMarker) {
+async function celebrateAndDisplayMessage() {
     // Play a sound
     var audio = new Audio('assets/yay.mp3'); // Replace with the path to your sound file
     audio.play();
@@ -263,53 +207,6 @@ async function celebrateAndDisplayMessage(currentVowelMarker) {
     }, timeToCelebrate); // Adjust timeout to match the duration of the confetti animation
 }
 
-// Function to draw a grid
-function drawGrid() {
-    let plotArea = document.getElementById('plot-area');
-
-    // Draw vertical lines
-    for (let i = 0; i <= numberOfVerticalLines; i++) {
-        let line = document.createElement('div');
-        line.className = 'grid-line vertical';
-        line.style.left = i * xSpacing + 'px';
-        plotArea.appendChild(line);
-    }
-
-    // Draw horizontal lines
-    for (let i = 0; i <= numberOfHorizontalLines; i++) {
-        let line = document.createElement('div');
-        line.className = 'grid-line horizontal';
-        line.style.top = i * ySpacing + 'px';
-        plotArea.appendChild(line);
-    }
-}
-
-function addAxisLabels() {
-    let plotArea = document.getElementById('plot-area');
-
-    let yAxisLabelUpperLeft = document.createElement('div');
-    yAxisLabelUpperLeft.className = 'axis-label';
-    yAxisLabelUpperLeft.textContent = 'front/closed';
-    yAxisLabelUpperLeft.style.top = '0';
-    plotArea.appendChild(yAxisLabelUpperLeft);
-    let yAxisLabelLowerLeft = document.createElement('div');
-    yAxisLabelLowerLeft.className = 'axis-label';
-    yAxisLabelLowerLeft.textContent = 'front/open';
-    yAxisLabelLowerLeft.style.bottom = '0';
-    plotArea.appendChild(yAxisLabelLowerLeft);
-    let xAxisLabelUpperRight = document.createElement('div');
-    xAxisLabelUpperRight.className = 'axis-label';
-    xAxisLabelUpperRight.textContent = 'back/closed';
-    xAxisLabelUpperRight.style.right = '0';
-    plotArea.appendChild(xAxisLabelUpperRight);
-    let xAxisLabelLowerRight = document.createElement('div');
-    xAxisLabelLowerRight.className = 'axis-label';
-    xAxisLabelLowerRight.textContent = 'back/open';
-    xAxisLabelLowerRight.style.right = '0';
-    xAxisLabelLowerRight.style.bottom = '0';
-    plotArea.appendChild(xAxisLabelLowerRight);
-}
-
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     initializePlot();
@@ -326,3 +223,63 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+
+// Function to initialize the plot
+function initializePlot() {
+    const gridArea = document.getElementById('grid-area');
+    createGrid();  //updateCellColor(1, 1, 'gray', 'red');
+}
+
+function createGrid() {
+    const gridArea = document.getElementById('grid-area');
+    let count = 0;
+    for (let i = 0; i < 5; i++) { // 5 rows
+      for (let j = 0; j < 8; j++) { // 8 columns
+        const cell = document.createElement('div');
+        cell.className = 'grid-cell';
+        cell.dataset.x = j;
+        cell.dataset.y = i;
+        gridArea.appendChild(cell);
+        count++;
+      }
+    }
+}
+
+function updateCellColor(x, y, backgroundColor, borderColor) {
+    const cells = document.querySelectorAll(`.grid-cell[data-x="${x}"][data-y="${y}"]`);
+    if (cells.length) {
+      cells.forEach(cell => {
+        cell.style.backgroundColor = backgroundColor;
+        cell.style.outline = `1px solid ${borderColor}`;
+      });
+    }
+}
+
+// Function to update the display with the next word, markers, picture, etc.
+function updateDisplay() {
+    //currentWordIndex = Math.floor(Math.random() * words.length);
+    currentWordIndex = (currentWordIndex + 1) % words.length;
+    let currentWord = words[currentWordIndex].word;
+    let currentFormattedWord = words[currentWordIndex].format;
+    document.getElementById('word-display').innerHTML = currentFormattedWord;
+
+    // Create markers for all of the vowels
+    vowels.forEach(vowel => {
+        // Use the position from the vowels array to color the grid cells
+        updateCellColor(vowel.position.x, vowel.position.y, defaultFillColorHex, vowel.vowel === words[currentWordIndex].vowel ? redColorHex : defaultBorderColorHex);
+    });
+
+    // Update the image source
+    let fixedImage = document.getElementById('image-fixed'); // Get the fixed image element
+    let stretchableImage = document.getElementById('image-stretch'); // Get the stretchable image element
+    fixedImage.style.display = 'block'; // Set the display property to make it visible
+    stretchableImage.style.display = 'block'; // Set the display property to make it visible
+    fixedImage.src = stretchableImage.src = 'assets/pictures/' + currentWord + '.png'; // Set the source of the image
+
+    // Ensure both images start with the same size
+    fixedImage.style.width = stretchableImage.style.width = imageSize + 'px';
+    fixedImage.style.height = stretchableImage.style.height = imageSize + 'px';
+
+    return vowels[currentWordIndex].position; // Return the position of the new word's vowel
+}
