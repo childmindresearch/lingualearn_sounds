@@ -6,9 +6,7 @@
 // Define global variables in css file
 let numHorizontalCells = 8;
 let numVerticalCells = 5;
-let cellWidth = 20; 
-let cellHeight = 20;
-let imageSize = 200;
+let imageSize = 400;
 
 // Define other global variables
 let redColorHex = "#ea234b"; //"#a31c3f";

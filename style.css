@@ -42,7 +42,8 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    /* height: 100vh; /* This makes sure it takes the full viewport height */
+    /*width: 100%; /* This makes sure it takes the full viewport width */
+    /*height: 100vh; /* This makes sure it takes the full viewport height */
 }
 
 #word-display {
@@ -56,8 +57,8 @@ body {
 
 #grid-area {
     display: grid;
-    grid-template-columns: repeat(8, 20px); /* Creates 8 columns, each 20px wide */
-    grid-template-rows: repeat(5, 20px); /* Creates 5 rows, each 20px high */
+    grid-template-columns: repeat(8, 30px); /* Creates 8 columns, each 20px wide */
+    grid-template-rows: repeat(5, 30px); /* Creates 5 rows, each 20px high */
     gap: 1px; /* Optional: Adds a gap between cells */
 }
 .grid-cell {
@@ -71,8 +72,8 @@ body {
     margin-top: 20px;
     justify-content: center;
     align-items: center;
-    width: 200px;
-    height: 200px;
+    width: 400px;
+    height: 400px;
 }
 #image-fixed, #image-stretch {
     position: absolute;
