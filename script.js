@@ -4,22 +4,25 @@
 */
 
 // Define global variables in css file
-let numHorizontalCells = 8;
-let numVerticalCells = 5;
-let imageSize = 400;
+const numHorizontalCells = 8;
+const numVerticalCells = 5;
+const imageSize = 400;
 
 // Define other global variables
-let redColorHex = "#ea234b"; //"#a31c3f";
-let defaultFillColorHex = "#ffffff";
-let defaultBorderColorHex = "#d3d3d3";
-let redColorRGB = [234, 35, 75]; //[155, 34, 66];
-let defaultFillColorRGB = [255, 255, 255];
-let defaultBorderColorRGB = [211, 211, 211];
+const maxImageHorizontalScaleFactor = 1.5;
+const maxImageVerticalScaleFactor = 1.25;
+const redColorHex = "#ea234b"; //"#a31c3f";
+const defaultFillColorHex = "#ffffff";
+const defaultBorderColorHex = "#d3d3d3";
+const redColorRGB = [234, 35, 75]; //[155, 34, 66];
+const defaultFillColorRGB = [255, 255, 255];
+const defaultBorderColorRGB = [211, 211, 211];
 const modelURL = "https://teachablemachine.withgoogle.com/models/g26KsVfaq/"; // Teachable Machine tensorflow model
 const sampleRate = 44100;
+const successThreshold = 0.75; // Define a suitable threshold for success
+const timeToCelebrate = 2000;
 let isListening = false;
 let currentWordIndex = -1;
-let timeToCelebrate = 2000;
 
 // Words
 const words = [
@@ -100,13 +103,23 @@ async function init() {
             currentVowel = words[currentWordIndex].vowel;
             const currentVowelIndex = recognizer.wordLabels().indexOf(currentVowel);
             const currentVowelScore = result.scores[currentVowelIndex];
-            const successThreshold = 0.75; // Define a suitable threshold for success
-            const isHighestScore = currentVowelScore === Math.max(...result.scores);
-            const successConditionMet = currentVowelScore > successThreshold && isHighestScore;
 
-            adjustImageScale(currentVowelScore, 'image-stretch');
+            // Find the label of the highest-scoring vowel
+            const highestScore = Math.max(...result.scores);
+            const highestScoreIndex = result.scores.findIndex(score => score === highestScore);
+            const highestScoreLabel = recognizer.wordLabels()[highestScoreIndex];
+            // Find this vowel in the vowels array to get its position
+            const highestScoreVowel = vowels.find(v => v.vowel === highestScoreLabel);
+            const highestScorePosition = highestScoreVowel ? highestScoreVowel.position : undefined;
+            // Ensure highestScorePosition is defined before using it
+            if (highestScorePosition) {
+                currentPosition = vowels[currentWordIndex].position;
+                adjustImageScale('image-stretch', currentPosition, highestScorePosition);
 
-            handleResult(successConditionMet, currentVowel); // Process the result to handle specific logic
+                const isHighestScore = currentVowelScore === highestScore;
+                const successConditionMet = currentVowelScore > successThreshold && isHighestScore;
+                handleResult(successConditionMet, currentVowel); // Process the result to handle specific logic
+            }
         }, {
             includeSpectrogram: true, // in case listen should return result.spectrogram
             probabilityThreshold: 0.75,
@@ -115,6 +128,31 @@ async function init() {
         });
     });
     //const classLabels = recognizer.wordLabels(); // get class labels
+}
+
+// Function to adjust the scale of the image based on proximity to score
+function adjustImageScale(imageId, currentPosition, highestScorePosition) {
+
+    const stretchImage = document.getElementById(imageId);
+
+    // Scale the image horizontally based on the difference in position.x 
+    // between the current vowel and the highest-scoring vowel.
+    // Scale the image vertically based on the difference in position.y 
+    // between the current vowel and the highest-scoring vowel.
+    let horizontalScaleFactor = 1 + Math.abs(currentPosition.x - highestScorePosition.x) / 10;
+    let verticalScaleFactor = 1 + Math.abs(currentPosition.y - highestScorePosition.y) / 10;
+
+    // Apply maximum scale factor
+    // The maximum scale in each direction is a factor times the scale of the fixed image.
+    horizontalScaleFactor = Math.min(horizontalScaleFactor, maxImageHorizontalScaleFactor); // * baseScale);
+    verticalScaleFactor = Math.min(verticalScaleFactor, maxImageVerticalScaleFactor); // * baseScale);
+    //console.log(horizontalScaleFactor, verticalScaleFactor);
+
+    // Apply the scale to the stretch image
+    stretchImage.style.transform = `scale(${horizontalScaleFactor}, ${verticalScaleFactor})`;
+
+    // Adjust the position to keep the bottom aligned with the fixed image
+    stretchImage.style.transformOrigin = 'bottom';
 }
 
 // Function to extend celebration if condition successfully met
@@ -166,17 +204,6 @@ function scoreToColor(score) {
     return `rgb(${r},${g},${b})`;
 }
 
-// Function to adjust the scale of the image based on proximity to score
-function adjustImageScale(score, imageId) {
-    const image = document.getElementById(imageId);
-
-    let adjustedScore = adjustScore(score);
-    //console.log('score: ', score);
-    //console.log('adjustedScore: ', adjustedScore);
-    const scaleFactor = 0.5; //adjustedScore; // Adjust based on score
-    image.style.transform = `scale(${scaleFactor}, ${scaleFactor})`;
-}
-
 // Combined function for celebrating success with audio and visual feedback
 async function celebrateAndDisplayMessage() {
     // Play a sound
@@ -201,29 +228,11 @@ async function celebrateAndDisplayMessage() {
     // Wait for the confetti to display before clearing
     await new Promise(resolve => setTimeout(resolve, timeToCelebrate)); // Adjust timeout to match the duration of the confetti animation
     confettiContainer.remove();
-    
+
     // Updata display (image, word, grid colors)
     updateDisplay();
 
 }
-
-// Initialize the application
-document.addEventListener('DOMContentLoaded', () => {
-    initializePlot();
-    updateDisplay(); // Initial display update
-    document.getElementById('start-button-img').addEventListener('click', async () => {
-        if (!isListening) {
-            const recognizer = await createModel(); // Load and prepare the model
-            init(recognizer); // Pass the loaded model to init for setting up real-time predictions
-            isListening = true; // Update the listening state
-            // Hide the start button
-            let startButtonImg = document.getElementById('start-button-img');
-            startButtonImg.style.visibility = 'hidden';
-            startButtonImg.style.opacity = '0';
-        }
-    });
-});
-
 
 // Function to initialize the plot
 function initializePlot() {
@@ -277,7 +286,7 @@ function updateDisplay() {
     fixedImage.style.display = 'block'; // Set the display property to make it visible
     stretchableImage.style.display = 'block'; // Set the display property to make it visible
     //fixedImage.src = stretchableImage.src = 'assets/pictures/' + currentWord + '.png'; // Set the source of the image
-    fixedImage.src = stretchableImage.src = 'assets/pictures/' + currentWord + '.png' + '?v=' + new Date().getTime();
+    fixedImage.src = stretchableImage.src = 'assets/pictures/' + currentWord + '.png' + '?v=' + new Date().getTime(); // add date to force refresh (cache)
 
     console.log(fixedImage.src);
 
@@ -285,3 +294,20 @@ function updateDisplay() {
     fixedImage.style.width = stretchableImage.style.width = imageSize + 'px';
     fixedImage.style.height = stretchableImage.style.height = imageSize + 'px';
 }
+
+// Initialize the application
+document.addEventListener('DOMContentLoaded', () => {
+    initializePlot();
+    updateDisplay(); // Initial display update
+    document.getElementById('start-button-img').addEventListener('click', async () => {
+        if (!isListening) {
+            const recognizer = await createModel(); // Load and prepare the model
+            init(recognizer); // Pass the loaded model to init for setting up real-time predictions
+            isListening = true; // Update the listening state
+            // Hide the start button
+            let startButtonImg = document.getElementById('start-button-img');
+            startButtonImg.style.visibility = 'hidden';
+            startButtonImg.style.opacity = '0';
+        }
+    });
+});

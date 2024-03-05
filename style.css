@@ -81,6 +81,9 @@ body {
     width: 100%; /* Ensure it fills the container */
     height: 100%; /* Ensure it fills the container */
 }
+#image-stretch {
+    bottom: 0;
+}
 
 #confetti-container {
     position: fixed;
@@ -111,6 +114,22 @@ body {
     100% { transform: translateY(100vh) rotate(45deg); }
 }
 
+/*
+Notes for scaling in mobile devices:
+
+Aspect Ratio Boxes: For non-image elements where aspect ratio needs to be maintained, 
+consider using a wrapping element with a percentage-based padding top, 
+which is a common technique for creating aspect-ratio boxes.
+
+Responsive Font Sizes: For text (like your word display), 
+consider using vw units for font sizes to ensure the text scales 
+with the viewport width, making it legible across devices.
+
+Testing and Adjustment: The specific values (like 90vw, 80vh, 6vw, etc.) 
+should be adjusted based on your specific layout, content, and design needs. 
+It's important to test these styles across different devices 
+to ensure the desired appearance and functionality.
+*/
 @media (max-width: 600px) {
 
     .logo, .header-text, .start-button {
@@ -129,35 +148,8 @@ body {
       font-size: 18vw; /* Scale the font size with screen width */
     }
   
-    .grid-cell {
-      /*width: 11vw; /* Adjust based on the number of cells to fit in one row */
-      /*height: 11vw; /* Adjust height similarly to maintain aspect ratio */
-    }
-    
-    #plot-area {
-      /*grid-template-columns: repeat(auto-fill, minmax(11vw, 1fr));
-      /*justify-content: center;*/
-    }
-
     #plot-area .grid-cell {
         width: 30px; 
         height: 30px;
     }  
 }
-
-/*
-Notes for scaling in mobile devices:
-
-Aspect Ratio Boxes: For non-image elements where aspect ratio needs to be maintained, 
-consider using a wrapping element with a percentage-based padding top, 
-which is a common technique for creating aspect-ratio boxes.
-
-Responsive Font Sizes: For text (like your word display), 
-consider using vw units for font sizes to ensure the text scales 
-with the viewport width, making it legible across devices.
-
-Testing and Adjustment: The specific values (like 90vw, 80vh, 6vw, etc.) 
-should be adjusted based on your specific layout, content, and design needs. 
-It's important to test these styles across different devices 
-to ensure the desired appearance and functionality.
-*/
