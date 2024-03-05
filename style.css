@@ -8,10 +8,13 @@
 }
 #logo {
     top: 0px; 
-    height: 36px;
+    max-height: 36px;
+    min-height: 24px;
+    max-width: 100%; /* Image will scale down, never exceeding container's width */
+    height: auto;  /* Height adjusts automatically to preserve aspect ratio */
 }
 h1 {
-    font-size: 20px;
+    font-size: 16px;
     color: #0067a0;
     justify-self: right;
     margin-right: 2px;
@@ -19,11 +22,12 @@ h1 {
 #start-button-img {
     cursor: pointer; /* image behaves like a clickable button */
     height: 30px;
+    width: 30px;
     visibility: visible; /* Default state */
     opacity: 1; /* Default state */
     transition: opacity 0.5s; /* Smooth transition for hiding */
-    justify-self: left;
-    margin-left: 10px;
+    justify-self: center; /*right*/
+    /*margin-left: 10px;*/
 }
 
 
@@ -67,8 +71,8 @@ body {
     margin-top: 20px;
     justify-content: center;
     align-items: center;
-    width: 100px;
-    height: 100px;
+    width: 200px;
+    height: 200px;
 }
 #image-fixed, #image-stretch {
     position: absolute;

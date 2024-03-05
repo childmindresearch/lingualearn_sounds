@@ -3,17 +3,14 @@
    Feedback is in the form of modified plot markers and stretched images.
 */
 
-// Define global variables
-let isListening = false;
-let currentWordIndex = -1;
-//let plotWidth = 800; // copied from style.css
-//let plotHeight = 500; // copied from style.css
+// Define global variables in css file
 let numHorizontalCells = 8;
 let numVerticalCells = 5;
 let cellWidth = 20; 
 let cellHeight = 20;
-let imageSize = 100;
-let timeToCelebrate = 1000;
+let imageSize = 200;
+
+// Define other global variables
 let redColorHex = "#ea234b"; //"#a31c3f";
 let defaultFillColorHex = "#ffffff";
 let defaultBorderColorHex = "#d3d3d3";
@@ -22,6 +19,9 @@ let defaultFillColorRGB = [255, 255, 255];
 let defaultBorderColorRGB = [211, 211, 211];
 const modelURL = "https://teachablemachine.withgoogle.com/models/g26KsVfaq/"; // Teachable Machine tensorflow model
 const sampleRate = 44100;
+let isListening = false;
+let currentWordIndex = -1;
+let timeToCelebrate = 1000;
 
 // Words
 const words = [
