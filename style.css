@@ -1,5 +1,24 @@
 /* style.css */
 
+@media (max-width: 600px) {
+    .logo, .header-text, .start-button {
+      font-size: 14px; 
+      padding: 5px; 
+    }
+    .container {
+      padding: 10px; 
+    }
+    #plot-area .grid-cell {
+      width: 30px; 
+      height: 30px;
+    }
+    img {
+      width: 80%; /* Make images responsive */
+      height: auto;
+    }
+}
+  
+  
 #header {
     display: grid;
     grid-template-columns: auto 1fr auto;
