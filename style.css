@@ -130,7 +130,7 @@ should be adjusted based on your specific layout, content, and design needs.
 It's important to test these styles across different devices 
 to ensure the desired appearance and functionality.
 */
-@media (max-width: 600px) {
+@media (max-width: 800px) {
 
     .logo, .header-text, .start-button {
         font-size: 14px; 

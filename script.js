@@ -9,8 +9,8 @@ const numVerticalCells = 5;
 const imageSize = 400;
 
 // Define other global variables
-const maxImageHorizontalScaleFactor = 1.5;
-const maxImageVerticalScaleFactor = 1.25;
+const imageHorizontalScaleFactor = 0.5;
+const imageVerticalScaleFactor = 0.25;
 const redColorHex = "#ea234b"; //"#a31c3f";
 const defaultFillColorHex = "#ffffff";
 const defaultBorderColorHex = "#d3d3d3";
@@ -139,14 +139,9 @@ function adjustImageScale(imageId, currentPosition, highestScorePosition) {
     // between the current vowel and the highest-scoring vowel.
     // Scale the image vertically based on the difference in position.y 
     // between the current vowel and the highest-scoring vowel.
-    let horizontalScaleFactor = 1 + Math.abs(currentPosition.x - highestScorePosition.x) / 10;
-    let verticalScaleFactor = 1 + Math.abs(currentPosition.y - highestScorePosition.y) / 10;
-
-    // Apply maximum scale factor
-    // The maximum scale in each direction is a factor times the scale of the fixed image.
-    horizontalScaleFactor = Math.min(horizontalScaleFactor, maxImageHorizontalScaleFactor); // * baseScale);
-    verticalScaleFactor = Math.min(verticalScaleFactor, maxImageVerticalScaleFactor); // * baseScale);
-    //console.log(horizontalScaleFactor, verticalScaleFactor);
+    // The maximum possible difference in position is 7 horizontally and 4 vertically.
+    let horizontalScaleFactor = 1 + imageHorizontalScaleFactor * (currentPosition.x - highestScorePosition.x) / 7;
+    let verticalScaleFactor = 1 + imageVerticalScaleFactor * (currentPosition.y - highestScorePosition.y) / 4;
 
     // Apply the scale to the stretch image
     stretchImage.style.transform = `scale(${horizontalScaleFactor}, ${verticalScaleFactor})`;
