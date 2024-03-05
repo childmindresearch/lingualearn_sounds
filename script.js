@@ -182,8 +182,8 @@ function adjustImageScale(score, imageId) {
 // Combined function for celebrating success with audio and visual feedback
 async function celebrateAndDisplayMessage() {
     // Play a sound
-    var audio = new Audio('assets/yay.mp3'); // Replace with the path to your sound file
-    audio.play();
+    // var audio = new Audio('assets/yay.mp3'); // Replace with the path to your sound file
+    // audio.play();
 
     // Create confetti container
     let confettiContainer = document.createElement('div');
