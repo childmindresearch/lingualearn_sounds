@@ -112,19 +112,35 @@ body {
 }
 
 @media (max-width: 600px) {
+
     .logo, .header-text, .start-button {
-      font-size: 14px; 
-      padding: 5px; 
+        font-size: 14px; 
+        padding: 5px; 
+      }
+  
+    img, #word-display, #plot-area {
+      width: 90vw; /* Fill most of the screen width */
+      max-height: 80vh; /* Prevent overrunning the screen height */
+      object-fit: contain; /* For images, to maintain aspect ratio without cropping */
+      margin: 2vh auto; /* Centering and providing some vertical spacing */
     }
-    .container {
-      padding: 10px; 
+  
+    #word-display {
+      font-size: 18vw; /* Scale the font size with screen width */
     }
+  
+    .grid-cell {
+      /*width: 11vw; /* Adjust based on the number of cells to fit in one row */
+      /*height: 11vw; /* Adjust height similarly to maintain aspect ratio */
+    }
+    
+    #plot-area {
+      /*grid-template-columns: repeat(auto-fill, minmax(11vw, 1fr));
+      /*justify-content: center;*/
+    }
+
     #plot-area .grid-cell {
-      width: 30px; 
-      height: 30px;
-    }
-    img {
-      width: 80%; /* Make images responsive */
-      height: auto;
-    }
+        width: 30px; 
+        height: 30px;
+    }  
 }

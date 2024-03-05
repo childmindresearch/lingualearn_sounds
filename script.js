@@ -100,7 +100,7 @@ async function init() {
             currentVowel = words[currentWordIndex].vowel;
             const currentVowelIndex = recognizer.wordLabels().indexOf(currentVowel);
             const currentVowelScore = result.scores[currentVowelIndex];
-            const successThreshold = 0.50; // Define a suitable threshold for success
+            const successThreshold = 0.75; // Define a suitable threshold for success
             const isHighestScore = currentVowelScore === Math.max(...result.scores);
             const successConditionMet = currentVowelScore > successThreshold && isHighestScore;
 
@@ -173,7 +173,7 @@ function adjustImageScale(score, imageId) {
     let adjustedScore = adjustScore(score);
     //console.log('score: ', score);
     //console.log('adjustedScore: ', adjustedScore);
-    const scaleFactor = adjustedScore; // Adjust based on score
+    const scaleFactor = 0.5; //adjustedScore; // Adjust based on score
     image.style.transform = `scale(${scaleFactor}, ${scaleFactor})`;
 }
 
@@ -229,6 +229,7 @@ function initializePlot() {
     createGrid();  //updateCellColor(1, 1, 'gray', 'red');
 }
 
+// Function to create a grid of independently addressable cells
 function createGrid() {
     const gridArea = document.getElementById('grid-area');
     let count = 0;
@@ -244,6 +245,7 @@ function createGrid() {
     }
 }
 
+// Function to update the background and outline colors of the grid cells
 function updateCellColor(x, y, backgroundColor, borderColor) {
     const cells = document.querySelectorAll(`.grid-cell[data-x="${x}"][data-y="${y}"]`);
     if (cells.length) {
@@ -262,9 +264,8 @@ function updateDisplay() {
     let currentFormattedWord = words[currentWordIndex].format;
     document.getElementById('word-display').innerHTML = currentFormattedWord;
 
-    // Create markers for all of the vowels
+    // Update cell background and outline colors for all of the vowels
     vowels.forEach(vowel => {
-        // Use the position from the vowels array to color the grid cells
         updateCellColor(vowel.position.x, vowel.position.y, defaultFillColorHex, vowel.vowel === words[currentWordIndex].vowel ? redColorHex : defaultBorderColorHex);
     });
 
@@ -278,6 +279,4 @@ function updateDisplay() {
     // Ensure both images start with the same size
     fixedImage.style.width = stretchableImage.style.width = imageSize + 'px';
     fixedImage.style.height = stretchableImage.style.height = imageSize + 'px';
-
-    return vowels[currentWordIndex].position; // Return the position of the new word's vowel
 }
