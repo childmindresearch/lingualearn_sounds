@@ -6,11 +6,11 @@
 // Define global variables in css file
 const numHorizontalCells = 8;
 const numVerticalCells = 5;
-const imageSize = 400;
+const imageSize = 300;
 
 // Define other global variables
-const imageHorizontalScaleFactor = 0.5;
-const imageVerticalScaleFactor = 0.25;
+const imageHorizontalScaleFactor = 0.66;
+const imageVerticalScaleFactor = 0.33;
 const redColorHex = "#ea234b"; //"#a31c3f";
 const defaultFillColorHex = "#ffffff";
 const defaultBorderColorHex = "#d3d3d3";

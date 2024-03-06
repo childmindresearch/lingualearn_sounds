@@ -3,37 +3,37 @@
 #header {
     display: flex;
     align-items: center;
-    justify-content: space-between; /* This will push the logo and the right-side content to opposite ends */
-    padding: 10px;
+    justify-content: flex-start; /* Aligns children to the start (left) */
+    padding: 0px;
+    flex-wrap: wrap; /* Allows items to wrap as needed */
 }
 
-.logo, .right-content {
-    flex-shrink: 1; /* Allows these items to shrink but not disappear */
-}
 .logo {
-    max-width: 120px; /* Starts scaling based on the viewport width */
+    max-width: 120px;
     height: auto;
+    min-width: 50px; /* Sets a minimum width for the logo */
 }
 
-.right-content {
+.header-actions {
     display: flex;
-    align-items: center;
+    align-items: center; /* Vertically aligns the items in the center */
+    justify-content: flex-start; /* Ensures h1 and start button are aligned to the start (left) */
 }
 
 h1 {
     font-size: 16px;
     color: #0067a0;
-    /*justify-self: right;
-    margin-right: 2px;*/
+    margin-left: 15px;
 }
+
 #start-button-img {
-    cursor: pointer; /* image behaves like a clickable button */
+    cursor: pointer;
     height: 30px;
     width: 30px;
-    margin-left: 10px; /* Add space between the h1 and the button */
-    visibility: visible; /* Default state */
-    opacity: 1; /* Default state */
-    transition: opacity 0.5s; /* Smooth transition for hiding */
+    margin-left: 10px;
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.5s;
 }
 
 
@@ -59,6 +59,32 @@ body {
 }
 
 
+#image-container {
+    position: relative;
+    margin-top: 20px;
+    height: 400px;
+    width: 400px;
+    display: flex;
+    align-items: flex-end; /* Ensures bottom alignment */
+    justify-content: center; /* Center align */
+}
+#image-fixed, #image-stretch {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    height: 300px;
+    width: auto; /* Maintain aspect ratio */
+}
+#image-fixed {
+    z-index: 1; /* Lower than #image-stretch, ensuring it's beneath */
+}
+#image-stretch {
+    z-index: 2; /* Ensures it overlays on top of #image-fixed */
+}
+
+
 #grid-area {
     display: grid;
     grid-template-columns: repeat(8, 30px); /* Creates 8 columns, each [#]px wide */
@@ -71,23 +97,6 @@ body {
     border: 1px solid lightgray;
 }
 
-#image-container {
-    position: relative;
-    margin-top: 20px;
-    justify-content: center;
-    align-items: center;
-    width: 400px;
-    height: 400px;
-}
-#image-fixed, #image-stretch {
-    position: absolute;
-    top: 0;
-    width: 100%; /* Ensure it fills the container */
-    height: 100%; /* Ensure it fills the container */
-}
-#image-stretch {
-    bottom: 0;
-}
 
 #confetti-container {
     position: fixed;
@@ -135,14 +144,29 @@ It's important to test these styles across different devices
 to ensure the desired appearance and functionality.
 */
 @media (max-width: 800px) {
-
-    .header-text, .start-button {
-        font-size: 14px; 
-        padding: 5px; 
+    #header {
+        flex-direction: column;
+        align-items: center;
     }
-  
+
     .logo {
-        max-width: 20vw;
+        max-width: 80px;
+        margin-bottom: 5px; /* Adjust space below logo */
+    }
+
+    .header-actions {
+        flex-direction: row; /* Keeps h1 and start button inline */
+        justify-content: center; /* Centers h1 and the button within their container */
+        width: 100%; /* Ensures the container takes full width of its parent, aiding in centering */
+        margin: 0; /* Resets any auto margins that may have been applied */
+    }
+
+    h1, #start-button-img {
+        margin: 0 5px; /* Adds a small margin to separate the h1 and start button */
+    }
+
+    h1 {
+        margin-left: 55px;
     }
 
     img, #word-display, #plot-area {
