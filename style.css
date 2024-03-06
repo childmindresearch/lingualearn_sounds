@@ -1,33 +1,39 @@
 /* style.css */
 
 #header {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
+    display: flex;
     align-items: center;
+    justify-content: space-between; /* This will push the logo and the right-side content to opposite ends */
     padding: 10px;
 }
-#logo {
-    top: 0px; 
-    max-height: 36px;
-    min-height: 24px;
-    max-width: 100%; /* Image will scale down, never exceeding container's width */
-    height: auto;  /* Height adjusts automatically to preserve aspect ratio */
+
+.logo, .right-content {
+    flex-shrink: 1; /* Allows these items to shrink but not disappear */
 }
+.logo {
+    max-width: 120px; /* Starts scaling based on the viewport width */
+    height: auto;
+}
+
+.right-content {
+    display: flex;
+    align-items: center;
+}
+
 h1 {
     font-size: 16px;
     color: #0067a0;
-    justify-self: right;
-    margin-right: 2px;
+    /*justify-self: right;
+    margin-right: 2px;*/
 }
 #start-button-img {
     cursor: pointer; /* image behaves like a clickable button */
     height: 30px;
     width: 30px;
+    margin-left: 10px; /* Add space between the h1 and the button */
     visibility: visible; /* Default state */
     opacity: 1; /* Default state */
     transition: opacity 0.5s; /* Smooth transition for hiding */
-    justify-self: center; /*right*/
-    /*margin-left: 10px;*/
 }
 
 
@@ -42,8 +48,6 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    /*width: 100%; /* This makes sure it takes the full viewport width */
-    /*height: 100vh; /* This makes sure it takes the full viewport height */
 }
 
 #word-display {
@@ -57,14 +61,14 @@ body {
 
 #grid-area {
     display: grid;
-    grid-template-columns: repeat(8, 30px); /* Creates 8 columns, each 20px wide */
-    grid-template-rows: repeat(5, 30px); /* Creates 5 rows, each 20px high */
-    gap: 1px; /* Optional: Adds a gap between cells */
+    grid-template-columns: repeat(8, 30px); /* Creates 8 columns, each [#]px wide */
+    grid-template-rows: repeat(5, 30px); /* Creates 5 rows, each [#]px high */
+    gap: 1px; /* Adds a gap between cells */
 }
 .grid-cell {
     width: 100%; /* Fills the cell */
     height: 100%;
-    border: 1px solid lightgray; /* Optional */
+    border: 1px solid lightgray;
 }
 
 #image-container {
@@ -132,11 +136,15 @@ to ensure the desired appearance and functionality.
 */
 @media (max-width: 800px) {
 
-    .logo, .header-text, .start-button {
+    .header-text, .start-button {
         font-size: 14px; 
         padding: 5px; 
-      }
+    }
   
+    .logo {
+        max-width: 20vw;
+    }
+
     img, #word-display, #plot-area {
       width: 90vw; /* Fill most of the screen width */
       max-height: 80vh; /* Prevent overrunning the screen height */

@@ -88,25 +88,24 @@ async function init() {
     // Adjust recognizer's audio processing to use the audio context
     recognizer.ensureModelLoaded().then(() => {
         // listen() takes two arguments:
-        // 1. A callback function that is invoked anytime a word is recognized.
+        // 1. A callback function that is invoked anytime a word is recognized
         // 2. A configuration object with adjustable fields
         recognizer.listen(result => {
-
             // Iterate over vowels to update each marker's color based on the score
             vowels.forEach(vowel => {
-                // Use the position from the vowels array to color the grid cells
-                let index = recognizer.wordLabels().indexOf(vowel.vowel);
-                let score = result.scores[index];
-                updateCellColor(vowel.position.x, vowel.position.y, scoreToColor(score), vowel.vowel === words[currentWordIndex].vowel ? redColorHex : defaultBorderColorHex);
+                if (vowel.vowel !== "Background Noise") { // Skip "Background Noise" label
+                    // Use the position from the vowels array to color the grid cells
+                    let index = recognizer.wordLabels().indexOf(vowel.vowel);
+                    let score = result.scores[index];
+                    updateCellColor(vowel.position.x, vowel.position.y, scoreToColor(score), vowel.vowel === words[currentWordIndex].vowel ? redColorHex : defaultBorderColorHex);
+                }
             });
-
-            // If the highest score matches the current word's vowel, celebrate success
-            currentVowel = words[currentWordIndex].vowel;
-            let currentVowelIndex = recognizer.wordLabels().indexOf(currentVowel);
-            let currentVowelScore = result.scores[currentVowelIndex];
 
             // Find the label of the highest-scoring vowel
             let highestScore = Math.max(...result.scores);
+            //const classLabels = recognizer.wordLabels(); // get class labels
+            //console.log(classLabels, result.scores, highestScore);
+
             let highestScoreIndex = result.scores.findIndex(score => score === highestScore);
             let highestScoreLabel = recognizer.wordLabels()[highestScoreIndex];
             // Find this vowel in the vowels array to get its position
@@ -114,15 +113,20 @@ async function init() {
             let highestScorePosition = highestScoreVowel ? highestScoreVowel.position : undefined;
             // Ensure highestScorePosition is defined before using it
             if (highestScorePosition) {
-                let currentPosition = vowels[currentWordIndex].position;
+                const currentPosition = vowels[currentWordIndex].position;
+                console.log(highestScore, currentPosition);
                 adjustImageScale('image-stretch', currentPosition, highestScorePosition);
 
+                // If the highest score matches the current word's vowel, celebrate success
+                const currentVowel = words[currentWordIndex].vowel;
+                const currentVowelIndex = recognizer.wordLabels().indexOf(currentVowel);
+                const currentVowelScore = result.scores[currentVowelIndex];
                 const isHighestScore = currentVowelScore === highestScore;
                 const successConditionMet = currentVowelScore > successThreshold && isHighestScore;
                 handleResult(successConditionMet, currentVowel); // Process the result to handle specific logic
             }
         }, {
-            includeSpectrogram: true, // in case listen should return result.spectrogram
+            includeSpectrogram: false, // in case listen should return result.spectrogram
             probabilityThreshold: 0.75,
             invokeCallbackOnNoiseAndUnknown: true,
             overlapFactor: 0.50
@@ -163,7 +167,6 @@ async function handleResult(successConditionMet, currentVowel) {
         }
         // Additional logic for celebration and display updates
         await celebrateAndDisplayMessage(); // Assuming this function handles celebration visuals or messages
-        updateDisplay(); // Update the display for the next word or state
     }       
 }
 
@@ -176,12 +179,6 @@ function adjustScore(score) {
  
     // Use an exponential function to amplify small scores
     const adjustedScore = Math.pow(score, 0.5); // Adjust the exponent as needed
-
-    // Use a logistic function 
-    // This function is typically used in logistic regression and neural networks 
-    // for activation functions. The general form here is tweaked to adjust its output 
-    // towards 1 based on the input value.
-    //const adjustedScore = 1 - (1 / (1 + Math.exp(-10 * (score - 0.5))));
 
     return adjustedScore;
 }
@@ -266,7 +263,7 @@ function updateCellColor(x, y, backgroundColor, borderColor) {
 // Function to update the display with the next word, markers, picture, etc.
 function updateDisplay() {
     //currentWordIndex = Math.floor(Math.random() * words.length);
-    currentWordIndex = (currentWordIndex + 1) % words.length;
+    currentWordIndex = currentWordIndex + 1;
     let currentWord = words[currentWordIndex].word;
     let currentFormattedWord = words[currentWordIndex].format;
     document.getElementById('word-display').innerHTML = currentFormattedWord;
