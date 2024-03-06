@@ -17,7 +17,8 @@ const defaultBorderColorHex = "#d3d3d3";
 const redColorRGB = [234, 35, 75]; //[155, 34, 66];
 const defaultFillColorRGB = [255, 255, 255];
 const defaultBorderColorRGB = [211, 211, 211];
-const modelURL = "https://teachablemachine.withgoogle.com/models/g26KsVfaq/"; // Teachable Machine tensorflow model
+const modelURL = "https://teachablemachine.withgoogle.com/models/qvN9cgbf5/"; // Teachable Machine tensorflow arno-9vowel-audio-model.tm
+//const modelURL = "https://teachablemachine.withgoogle.com/models/rIz8bpeuo/"; // Teachable Machine tensorflow arno-9word-audio-model.tm
 const sampleRate = 44100;
 const successThreshold = 0.75; // Define a suitable threshold for success
 const timeToCelebrate = 2000;
@@ -94,26 +95,26 @@ async function init() {
             // Iterate over vowels to update each marker's color based on the score
             vowels.forEach(vowel => {
                 // Use the position from the vowels array to color the grid cells
-                const index = recognizer.wordLabels().indexOf(vowel.vowel);
-                const score = result.scores[index];
+                let index = recognizer.wordLabels().indexOf(vowel.vowel);
+                let score = result.scores[index];
                 updateCellColor(vowel.position.x, vowel.position.y, scoreToColor(score), vowel.vowel === words[currentWordIndex].vowel ? redColorHex : defaultBorderColorHex);
             });
 
             // If the highest score matches the current word's vowel, celebrate success
             currentVowel = words[currentWordIndex].vowel;
-            const currentVowelIndex = recognizer.wordLabels().indexOf(currentVowel);
-            const currentVowelScore = result.scores[currentVowelIndex];
+            let currentVowelIndex = recognizer.wordLabels().indexOf(currentVowel);
+            let currentVowelScore = result.scores[currentVowelIndex];
 
             // Find the label of the highest-scoring vowel
-            const highestScore = Math.max(...result.scores);
-            const highestScoreIndex = result.scores.findIndex(score => score === highestScore);
-            const highestScoreLabel = recognizer.wordLabels()[highestScoreIndex];
+            let highestScore = Math.max(...result.scores);
+            let highestScoreIndex = result.scores.findIndex(score => score === highestScore);
+            let highestScoreLabel = recognizer.wordLabels()[highestScoreIndex];
             // Find this vowel in the vowels array to get its position
-            const highestScoreVowel = vowels.find(v => v.vowel === highestScoreLabel);
-            const highestScorePosition = highestScoreVowel ? highestScoreVowel.position : undefined;
+            let highestScoreVowel = vowels.find(v => v.vowel === highestScoreLabel);
+            let highestScorePosition = highestScoreVowel ? highestScoreVowel.position : undefined;
             // Ensure highestScorePosition is defined before using it
             if (highestScorePosition) {
-                currentPosition = vowels[currentWordIndex].position;
+                let currentPosition = vowels[currentWordIndex].position;
                 adjustImageScale('image-stretch', currentPosition, highestScorePosition);
 
                 const isHighestScore = currentVowelScore === highestScore;
@@ -281,7 +282,8 @@ function updateDisplay() {
     fixedImage.style.display = 'block'; // Set the display property to make it visible
     stretchableImage.style.display = 'block'; // Set the display property to make it visible
     //fixedImage.src = stretchableImage.src = 'assets/pictures/' + currentWord + '.png'; // Set the source of the image
-    fixedImage.src = stretchableImage.src = 'assets/pictures/' + currentWord + '.png' + '?v=' + new Date().getTime(); // add date to force refresh (cache)
+    fixedImage.src = 'assets/pictures/' + currentWord + '-red.png' + '?v=' + new Date().getTime(); // add date to force refresh (cache)
+    stretchableImage.src = 'assets/pictures/' + currentWord + '.png' + '?v=' + new Date().getTime(); // add date to force refresh (cache)
 
     console.log(fixedImage.src);
 

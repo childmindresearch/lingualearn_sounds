@@ -39,6 +39,7 @@ const words = [
 
 // Function to initialize audio processing
 async function initAudio() {
+    //audioContext = new (window.AudioContext || window.AudioContext)();
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
     sampleRate = audioContext.sampleRate;
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -46,6 +47,7 @@ async function initAudio() {
     analyser = audioContext.createAnalyser();
     microphone.connect(analyser);
     isListening = true;
+    console.log(isListening);
     processAudio();
 }
 
@@ -60,6 +62,7 @@ function processAudio() {
         analyser.getFloatFrequencyData(dataArray);
 
         const features = extractFeatures(dataArray);
+        console.log(features);
         updateMarkerPosition(features);
         //checkProximity();
     };
@@ -132,8 +135,8 @@ function displayNextWord() {
 // Function to update the marker position
 function updateMarkerPosition(features) {
     // Normalize x and y values to fit within the plot area
-    //console.log("features.x: ", features.x)
-    //console.log("features.y: ", features.y)
+    console.log("features.x: ", features.x)
+    console.log("features.y: ", features.y)
     let normalizedX = normalizeValue(features.x, minX, maxX, 0, plotWidth);
     let normalizedY = normalizeValue(features.y, minY, maxY, 0, plotHeight);
     //console.log("normalizedX: ", normalizedX)
