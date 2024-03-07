@@ -9,18 +9,23 @@ const numVerticalCells = 5;
 const imageSize = 300;
 
 // Define other global variables
-const imageHorizontalScaleFactor = 0.66;
-const imageVerticalScaleFactor = 0.33;
+const imageHorizontalScaleFactor = 0.2;
+const imageVerticalScaleFactor = 0.1;
+
 const redColorHex = "#ea234b"; //"#a31c3f";
 const defaultFillColorHex = "#ffffff";
 const defaultBorderColorHex = "#d3d3d3";
 const redColorRGB = [234, 35, 75]; //[155, 34, 66];
 const defaultFillColorRGB = [255, 255, 255];
 const defaultBorderColorRGB = [211, 211, 211];
+
 const modelURL = "https://teachablemachine.withgoogle.com/models/qvN9cgbf5/"; // Teachable Machine tensorflow arno-9vowel-audio-model.tm
-//const modelURL = "https://teachablemachine.withgoogle.com/models/rIz8bpeuo/"; // Teachable Machine tensorflow arno-9word-audio-model.tm
 const sampleRate = 44100;
-const successThreshold = 0.75; // Define a suitable threshold for success
+
+const successThreshold = 0.5; // Define a suitable threshold for success
+const probabilityThreshold = 0.75;
+const overlapFactor = 0.5;
+
 const timeToCelebrate = 2000;
 let isListening = false;
 let currentWordIndex = -1;
@@ -92,48 +97,51 @@ async function init() {
         // 2. A configuration object with adjustable fields
         recognizer.listen(result => {
             // Iterate over vowels to update each marker's color based on the score
-            vowels.forEach(vowel => {
-                if (vowel.vowel !== "Background Noise") { // Skip "Background Noise" label
-                    // Use the position from the vowels array to color the grid cells
-                    let index = recognizer.wordLabels().indexOf(vowel.vowel);
-                    let score = result.scores[index];
-                    console.log(score);
+            const scoresWithBackgroundNoise = result.scores;
 
-                    updateCellColor(vowel.position.x, vowel.position.y, scoreToColor(score), vowel.vowel === words[currentWordIndex].vowel ? redColorHex : defaultBorderColorHex);
-                }
+            // Model class labels array
+            const labelsWithBackgroundNoise = recognizer.wordLabels();
+            // Find the index of "Background noise" in the labels array
+            const backgroundNoiseIndex = labelsWithBackgroundNoise.indexOf("Background Noise");
+            // Extract the "Background noise" score using the found index
+            const backgroundNoiseScore = scoresWithBackgroundNoise[backgroundNoiseIndex];
+            // Extract scores without "Background noise"
+            const scores = scoresWithBackgroundNoise.filter((_, index) => index !== backgroundNoiseIndex);
+            const labels = labelsWithBackgroundNoise.filter((_, index) => index !== backgroundNoiseIndex);
+            //console.log(scores, labels, vowels);
+
+            // Update grid cell colors according to scores
+            vowels.forEach(vowel => {
+                // Use the position from the vowels array to color the grid cells
+                let index = labels.indexOf(vowel.vowel);
+                let score = scores[index];
+                updateCellColor(vowel.position.x, vowel.position.y, scoreToColor(score), vowel.vowel === words[currentWordIndex].vowel ? redColorHex : defaultBorderColorHex);
             });
 
-            // Find the label of the highest-scoring vowel
-            let highestScore = Math.max(...result.scores);
-            console.log(highestScore);
-
-            //const classLabels = recognizer.wordLabels(); // get class labels
-            //console.log(classLabels, result.scores, highestScore);
-
-            let highestScoreIndex = result.scores.findIndex(score => score === highestScore);
-            let highestScoreLabel = recognizer.wordLabels()[highestScoreIndex];
-            // Find this vowel in the vowels array to get its position
-            let highestScoreVowel = vowels.find(v => v.vowel === highestScoreLabel);
-            let highestScorePosition = highestScoreVowel ? highestScoreVowel.position : undefined;
-            // Ensure highestScorePosition is defined before using it
-            if (highestScorePosition) {
+            // Find the maximum scoring vowel's position
+            const highestScore = Math.max(...scores);
+            if (highestScore > backgroundNoiseScore) {
+                const highestScoreIndex = scores.findIndex(score => score === highestScore);
+                const highestScoreLabel = labels[highestScoreIndex];
+                const highestScoreVowel = vowels.find(v => v.vowel === highestScoreLabel);
+                const highestScorePosition = highestScoreVowel.position;
+    
                 const currentPosition = vowels[currentWordIndex].position;
-                //console.log(highestScore, currentPosition);
                 adjustImageScale('image-stretch', currentPosition, highestScorePosition);
 
-                // If the highest score matches the current word's vowel, celebrate success
+                // If the highest score matches the current word's vowel and is above a threshold, celebrate success
                 const currentVowel = words[currentWordIndex].vowel;
-                const currentVowelIndex = recognizer.wordLabels().indexOf(currentVowel);
-                const currentVowelScore = result.scores[currentVowelIndex];
+                const currentVowelIndex = labels.indexOf(currentVowel);
+                const currentVowelScore = scores[currentVowelIndex];
                 const isHighestScore = currentVowelScore === highestScore;
                 const successConditionMet = currentVowelScore > successThreshold && isHighestScore;
                 handleResult(successConditionMet, currentVowel); // Process the result to handle specific logic
             }
         }, {
             includeSpectrogram: false, // in case listen should return result.spectrogram
-            probabilityThreshold: 0.75,
+            probabilityThreshold: probabilityThreshold,
             invokeCallbackOnNoiseAndUnknown: true,
-            overlapFactor: 0.50
+            overlapFactor: overlapFactor
         });
     });
     //const classLabels = recognizer.wordLabels(); // get class labels
@@ -144,11 +152,12 @@ function adjustImageScale(imageId, currentPosition, highestScorePosition) {
 
     const stretchImage = document.getElementById(imageId);
 
-    // Scale the image horizontally based on the difference in position.x 
-    // between the current vowel and the highest-scoring vowel.
-    // Scale the image vertically based on the difference in position.y 
-    // between the current vowel and the highest-scoring vowel.
-    // The maximum possible difference in position is 7 horizontally and 4 vertically.
+    /* Scale the image horizontally based on the difference in position.x 
+       between the current vowel and the highest-scoring vowel.
+       Scale the image vertically based on the difference in position.y 
+       between the current vowel and the highest-scoring vowel.
+       The maximum possible difference in position is 7 horizontally and 4 vertically. 
+    */
     let horizontalScaleFactor = 1 + imageHorizontalScaleFactor * (currentPosition.x - highestScorePosition.x) / 7;
     let verticalScaleFactor = 1 + imageVerticalScaleFactor * (currentPosition.y - highestScorePosition.y) / 4;
 
@@ -283,7 +292,7 @@ function updateDisplay() {
     fixedImage.style.display = 'block'; // Set the display property to make it visible
     stretchableImage.style.display = 'block'; // Set the display property to make it visible
     //fixedImage.src = stretchableImage.src = 'assets/pictures/' + currentWord + '.png'; // Set the source of the image
-    fixedImage.src = 'assets/pictures/' + currentWord + '.png' + '?v=' + new Date().getTime(); // add date to force refresh (cache)
+    fixedImage.src = 'assets/pictures/' + currentWord + '-red.png' + '?v=' + new Date().getTime(); // add date to force refresh (cache)
     stretchableImage.src = 'assets/pictures/' + currentWord + '.png' + '?v=' + new Date().getTime(); // add date to force refresh (cache)
 
     // Ensure both images start with the same size
