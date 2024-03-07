@@ -96,7 +96,12 @@ body {
     height: 100%;
     border: 1px solid lightgray;
 }
-
+.highlighted-border {
+    border-color: #ea234b; /* Highlight color */
+}
+#grid-area .grid-cell.highlighted-border {
+    border-color: #ea234b; /* Increased specificity */
+}
 
 #confetti-container {
     position: fixed;

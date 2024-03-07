@@ -97,12 +97,16 @@ async function init() {
                     // Use the position from the vowels array to color the grid cells
                     let index = recognizer.wordLabels().indexOf(vowel.vowel);
                     let score = result.scores[index];
+                    console.log(score);
+
                     updateCellColor(vowel.position.x, vowel.position.y, scoreToColor(score), vowel.vowel === words[currentWordIndex].vowel ? redColorHex : defaultBorderColorHex);
                 }
             });
 
             // Find the label of the highest-scoring vowel
             let highestScore = Math.max(...result.scores);
+            console.log(highestScore);
+
             //const classLabels = recognizer.wordLabels(); // get class labels
             //console.log(classLabels, result.scores, highestScore);
 
@@ -114,7 +118,7 @@ async function init() {
             // Ensure highestScorePosition is defined before using it
             if (highestScorePosition) {
                 const currentPosition = vowels[currentWordIndex].position;
-                console.log(highestScore, currentPosition);
+                //console.log(highestScore, currentPosition);
                 adjustImageScale('image-stretch', currentPosition, highestScorePosition);
 
                 // If the highest score matches the current word's vowel, celebrate success
@@ -255,7 +259,7 @@ function updateCellColor(x, y, backgroundColor, borderColor) {
     if (cells.length) {
       cells.forEach(cell => {
         cell.style.backgroundColor = backgroundColor;
-        cell.style.outline = `1px solid ${borderColor}`;
+        cell.style.border = `2px solid ${borderColor}`;
       });
     }
 }
@@ -281,8 +285,6 @@ function updateDisplay() {
     //fixedImage.src = stretchableImage.src = 'assets/pictures/' + currentWord + '.png'; // Set the source of the image
     fixedImage.src = 'assets/pictures/' + currentWord + '.png' + '?v=' + new Date().getTime(); // add date to force refresh (cache)
     stretchableImage.src = 'assets/pictures/' + currentWord + '.png' + '?v=' + new Date().getTime(); // add date to force refresh (cache)
-
-    console.log(fixedImage.src);
 
     // Ensure both images start with the same size
     fixedImage.style.width = stretchableImage.style.width = imageSize + 'px';
