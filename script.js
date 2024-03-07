@@ -276,7 +276,7 @@ function updateCellColor(x, y, backgroundColor, borderColor) {
 // Function to update the display with the next word, markers, picture, etc.
 function updateDisplay() {
     //currentWordIndex = Math.floor(Math.random() * words.length);
-    currentWordIndex = currentWordIndex + 1;
+    currentWordIndex = (currentWordIndex + 1) % words.length;
     let currentWord = words[currentWordIndex].word;
     let currentFormattedWord = words[currentWordIndex].format;
     document.getElementById('word-display').innerHTML = currentFormattedWord;
