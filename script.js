@@ -279,7 +279,7 @@ function updateDisplay() {
     fixedImage.style.display = 'block'; // Set the display property to make it visible
     stretchableImage.style.display = 'block'; // Set the display property to make it visible
     //fixedImage.src = stretchableImage.src = 'assets/pictures/' + currentWord + '.png'; // Set the source of the image
-    fixedImage.src = 'assets/pictures/' + currentWord + '-red.png' + '?v=' + new Date().getTime(); // add date to force refresh (cache)
+    fixedImage.src = 'assets/pictures/' + currentWord + '.png' + '?v=' + new Date().getTime(); // add date to force refresh (cache)
     stretchableImage.src = 'assets/pictures/' + currentWord + '.png' + '?v=' + new Date().getTime(); // add date to force refresh (cache)
 
     console.log(fixedImage.src);
