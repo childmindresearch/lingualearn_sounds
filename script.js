@@ -32,27 +32,27 @@ let currentWordIndex = -1;
 
 // Words
 const words = [
-    { word: "bot", format: "b<span class='highlighted'>o</span>t", vowel: "AA" },
-    { word: "beetle", format: "b<span class='highlighted'>ee</span>t", vowel: "IY" }, 
-    { word: "bitcoin", format: "b<span class='highlighted'>i</span>t", vowel: "IH" }, 
-    { word: "betta", format: "b<span class='highlighted'>e</span>t", vowel: "EH" },
-    { word: "bat", format: "b<span class='highlighted'>a</span>t", vowel: "AE" },
-    { word: "book", format: "b<span class='highlighted'>oo</span>k", vowel: "UH" },
-    { word: "butterfly", format: "b<span class='highlighted'>u</span>t", vowel: "AH" },
+    { word: "beetle", format: "b<span class='highlighted'>ee</span>tle", vowel: "IY" }, 
     { word: "boot", format: "b<span class='highlighted'>oo</span>t", vowel: "UW" },
+    { word: "betta", format: "b<span class='highlighted'>e</span>tta", vowel: "EH" },
+    { word: "book", format: "b<span class='highlighted'>oo</span>k", vowel: "UH" },
+    { word: "bot", format: "b<span class='highlighted'>o</span>t", vowel: "AA" },
+    { word: "butterfly", format: "b<span class='highlighted'>u</span>tterfly", vowel: "AH" },
+    { word: "bat", format: "b<span class='highlighted'>a</span>t", vowel: "AE" },
+    { word: "bitten", format: "b<span class='highlighted'>i</span>tten", vowel: "IH" }, 
     { word: "bought", format: "b<span class='highlighted'>ough</span>t", vowel: "AO" } 
 ];
 
 // Vowels and their (zero-index) positions in the IPA chart
 const vowels = [
-    { vowel: "AA", position: { x: 4, y: 4 } },
     { vowel: "IY", position: { x: 0, y: 0 } }, 
-    { vowel: "IH", position: { x: 1, y: 1 } }, 
-    { vowel: "EH", position: { x: 2, y: 2 } },
-    { vowel: "AE", position: { x: 3, y: 3 } },
-    { vowel: "UH", position: { x: 5, y: 1 } },
-    { vowel: "AH", position: { x: 6, y: 2 } },
     { vowel: "UW", position: { x: 7, y: 0 } },
+    { vowel: "EH", position: { x: 2, y: 2 } },
+    { vowel: "UH", position: { x: 5, y: 1 } },
+    { vowel: "AA", position: { x: 4, y: 4 } },
+    { vowel: "AH", position: { x: 6, y: 2 } },
+    { vowel: "AE", position: { x: 3, y: 3 } },
+    { vowel: "IH", position: { x: 1, y: 1 } }, 
     { vowel: "AO", position: { x: 7, y: 2 } } 
 ];
 
