@@ -33,12 +33,12 @@ let currentWordIndex = -1;
 // Words
 const words = [
     { word: "bot", format: "b<span class='highlighted'>o</span>t", vowel: "AA" },
-    { word: "beet", format: "b<span class='highlighted'>ee</span>t", vowel: "IY" }, 
-    { word: "bit", format: "b<span class='highlighted'>i</span>t", vowel: "IH" }, 
-    { word: "bet", format: "b<span class='highlighted'>e</span>t", vowel: "EH" },
+    { word: "beetle", format: "b<span class='highlighted'>ee</span>t", vowel: "IY" }, 
+    { word: "bitcoin", format: "b<span class='highlighted'>i</span>t", vowel: "IH" }, 
+    { word: "betta", format: "b<span class='highlighted'>e</span>t", vowel: "EH" },
     { word: "bat", format: "b<span class='highlighted'>a</span>t", vowel: "AE" },
     { word: "book", format: "b<span class='highlighted'>oo</span>k", vowel: "UH" },
-    { word: "but", format: "b<span class='highlighted'>u</span>t", vowel: "AH" },
+    { word: "butterfly", format: "b<span class='highlighted'>u</span>t", vowel: "AH" },
     { word: "boot", format: "b<span class='highlighted'>oo</span>t", vowel: "UW" },
     { word: "bought", format: "b<span class='highlighted'>ough</span>t", vowel: "AO" } 
 ];
@@ -293,7 +293,7 @@ function updateDisplay() {
     stretchableImage.style.display = 'block'; // Set the display property to make it visible
     //fixedImage.src = stretchableImage.src = 'assets/pictures/' + currentWord + '.png'; // Set the source of the image
     fixedImage.src = 'assets/pictures/' + currentWord + '-red.png' + '?v=' + new Date().getTime(); // add date to force refresh (cache)
-    stretchableImage.src = 'assets/pictures/' + currentWord + '.png' + '?v=' + new Date().getTime(); // add date to force refresh (cache)
+    stretchableImage.src = 'assets/pictures/' + currentWord + '-black.png' + '?v=' + new Date().getTime(); // add date to force refresh (cache)
 
     // Ensure both images start with the same size
     fixedImage.style.width = stretchableImage.style.width = imageSize + 'px';

@@ -78,10 +78,10 @@ body {
     width: auto; /* Maintain aspect ratio */
 }
 #image-fixed {
-    z-index: 1; /* Lower than #image-stretch, ensuring it's beneath */
+    z-index: 2; /* Lower than #image-stretch, ensuring it's beneath */
 }
 #image-stretch {
-    z-index: 2; /* Ensures it overlays on top of #image-fixed */
+    z-index: 1; /* Ensures it overlays on top of #image-fixed */
 }
 
 
