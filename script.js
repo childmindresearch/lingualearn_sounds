@@ -33,8 +33,8 @@ let currentWordIndex = -1;
 // Words
 const words = [
     { word: "beetle", format: "b<span class='highlighted'>ee</span>tle", vowel: "IY" }, 
-    { word: "boot", format: "b<span class='highlighted'>oo</span>t", vowel: "UW" },
     { word: "betta", format: "b<span class='highlighted'>e</span>tta", vowel: "EH" },
+    { word: "boot", format: "b<span class='highlighted'>oo</span>t", vowel: "UW" },
     { word: "book", format: "b<span class='highlighted'>oo</span>k", vowel: "UH" },
     { word: "bot", format: "b<span class='highlighted'>o</span>t", vowel: "AA" },
     { word: "butterfly", format: "b<span class='highlighted'>u</span>tterfly", vowel: "AH" },
@@ -46,8 +46,8 @@ const words = [
 // Vowels and their (zero-index) positions in the IPA chart
 const vowels = [
     { vowel: "IY", position: { x: 0, y: 0 } }, 
-    { vowel: "UW", position: { x: 7, y: 0 } },
     { vowel: "EH", position: { x: 2, y: 2 } },
+    { vowel: "UW", position: { x: 7, y: 0 } },
     { vowel: "UH", position: { x: 5, y: 1 } },
     { vowel: "AA", position: { x: 4, y: 4 } },
     { vowel: "AH", position: { x: 6, y: 2 } },
