@@ -22,7 +22,7 @@ const defaultBorderColorRGB = [211, 211, 211];
 const modelURL = "https://teachablemachine.withgoogle.com/models/qvN9cgbf5/"; // Teachable Machine tensorflow arno-9vowel-audio-model.tm
 const sampleRate = 44100;
 
-const successThreshold = 0.5; // Define a suitable threshold for success
+const successThreshold = 0.75; // Define a suitable threshold for success
 const probabilityThreshold = 0.75;
 const overlapFactor = 0.5;
 
@@ -35,10 +35,10 @@ const words = [
     { word: "beetle", format: "b<span class='highlighted'>ee</span>tle", vowel: "IY" }, 
     { word: "betta", format: "b<span class='highlighted'>e</span>tta", vowel: "EH" },
     { word: "boot", format: "b<span class='highlighted'>oo</span>t", vowel: "UW" },
-    { word: "book", format: "b<span class='highlighted'>oo</span>k", vowel: "UH" },
     { word: "bot", format: "b<span class='highlighted'>o</span>t", vowel: "AA" },
     { word: "butterfly", format: "b<span class='highlighted'>u</span>tterfly", vowel: "AH" },
     { word: "bat", format: "b<span class='highlighted'>a</span>t", vowel: "AE" },
+    { word: "book", format: "b<span class='highlighted'>oo</span>k", vowel: "UH" },
     { word: "bitten", format: "b<span class='highlighted'>i</span>tten", vowel: "IH" }, 
     { word: "bought", format: "b<span class='highlighted'>ough</span>t", vowel: "AO" } 
 ];
@@ -48,10 +48,10 @@ const vowels = [
     { vowel: "IY", position: { x: 0, y: 0 } }, 
     { vowel: "EH", position: { x: 2, y: 2 } },
     { vowel: "UW", position: { x: 7, y: 0 } },
-    { vowel: "UH", position: { x: 5, y: 1 } },
     { vowel: "AA", position: { x: 4, y: 4 } },
     { vowel: "AH", position: { x: 6, y: 2 } },
     { vowel: "AE", position: { x: 3, y: 3 } },
+    { vowel: "UH", position: { x: 5, y: 1 } },
     { vowel: "IH", position: { x: 1, y: 1 } }, 
     { vowel: "AO", position: { x: 7, y: 2 } } 
 ];
@@ -273,6 +273,21 @@ function updateCellColor(x, y, backgroundColor, borderColor) {
     }
 }
 
+// Preload images
+function preloadImagesAndDisplay(images, callback) {
+    let loadedCount = 0;
+    images.forEach(imgObj => {
+        const img = new Image();
+        img.onload = () => {
+            loadedCount++;
+            if (loadedCount === images.length) {
+                callback(); // All images are loaded
+            }
+        };
+        img.src = imgObj.src;
+    });
+}
+
 // Function to update the display with the next word, markers, picture, etc.
 function updateDisplay() {
     //currentWordIndex = Math.floor(Math.random() * words.length);
@@ -286,18 +301,31 @@ function updateDisplay() {
         updateCellColor(vowel.position.x, vowel.position.y, defaultFillColorHex, vowel.vowel === words[currentWordIndex].vowel ? redColorHex : defaultBorderColorHex);
     });
 
-    // Update the image source
-    let fixedImage = document.getElementById('image-fixed'); // Get the fixed image element
-    let stretchableImage = document.getElementById('image-stretch'); // Get the stretchable image element
-    fixedImage.style.display = 'block'; // Set the display property to make it visible
-    stretchableImage.style.display = 'block'; // Set the display property to make it visible
-    //fixedImage.src = stretchableImage.src = 'assets/pictures/' + currentWord + '.png'; // Set the source of the image
-    fixedImage.src = 'assets/pictures/' + currentWord + '-red.png' + '?v=' + new Date().getTime(); // add date to force refresh (cache)
-    stretchableImage.src = 'assets/pictures/' + currentWord + '-black.png' + '?v=' + new Date().getTime(); // add date to force refresh (cache)
+    // Define the new image sources
+    let fixedImageSrc = 'assets/pictures/' + currentWord + '-red.png' + '?v=' + new Date().getTime(); // Add date to force refresh (cache)
+    let stretchableImageSrc = 'assets/pictures/' + currentWord + '-black.png' + '?v=' + new Date().getTime(); // Add date to force refresh (cache)
 
-    // Ensure both images start with the same size
-    fixedImage.style.width = stretchableImage.style.width = imageSize + 'px';
-    fixedImage.style.height = stretchableImage.style.height = imageSize + 'px';
+    // Prepare images for preloading
+    let imagesToPreload = [
+        {element: document.getElementById('image-fixed'), src: fixedImageSrc},
+        {element: document.getElementById('image-stretch'), src: stretchableImageSrc}
+    ];
+
+    // Initially hide images to prevent flash
+    imagesToPreload.forEach(img => {
+        img.element.style.visibility = 'hidden'; // Hide images initially
+    });
+
+    // Preload images and update their sources once loaded
+    preloadImagesAndDisplay(imagesToPreload, () => {
+        // Make images visible and update their sources once they are loaded
+        imagesToPreload.forEach(img => {
+            img.element.src = img.src;
+            img.element.style.visibility = 'visible'; // Show images
+            img.element.style.width = imageSize + 'px';
+            img.element.style.height = imageSize + 'px';
+        });
+    });
 }
 
 // Initialize the application
