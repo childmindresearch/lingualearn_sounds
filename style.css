@@ -74,6 +74,7 @@ body {
     left: 0;
     right: 0;
     margin: auto;
+    object-fit: contain; /* Ensures the content is sized to maintain its aspect ratio while fitting within the element’s content box. */
     max-height: 300px;
     width: auto; /* Maintain aspect ratio */
 }
