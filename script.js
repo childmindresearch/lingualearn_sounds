@@ -301,30 +301,32 @@ function updateDisplay() {
         updateCellColor(vowel.position.x, vowel.position.y, defaultFillColorHex, vowel.vowel === words[currentWordIndex].vowel ? redColorHex : defaultBorderColorHex);
     });
 
-    // Define the new image sources
-    let fixedImageSrc = 'assets/pictures/' + currentWord + '-red.png' + '?v=' + new Date().getTime(); // Add date to force refresh (cache)
-    let stretchableImageSrc = 'assets/pictures/' + currentWord + '-black.png' + '?v=' + new Date().getTime(); // Add date to force refresh (cache)
+    // Capture the current state for the images to preload
+    let fixedImageElement = document.getElementById('image-fixed');
+    let stretchableImageElement = document.getElementById('image-stretch');
+    let fixedImageSrc = 'assets/pictures/' + currentWord + '-red.png' + '?v=' + new Date().getTime();
+    let stretchableImageSrc = 'assets/pictures/' + currentWord + '-black.png' + '?v=' + new Date().getTime();
 
-    // Prepare images for preloading
+    // Prepare images for preloading with the captured state
     let imagesToPreload = [
-        {element: document.getElementById('image-fixed'), src: fixedImageSrc},
-        {element: document.getElementById('image-stretch'), src: stretchableImageSrc}
+        {element: fixedImageElement, src: fixedImageSrc},
+        {element: stretchableImageElement, src: stretchableImageSrc}
     ];
 
     // Initially hide images to prevent flash
     imagesToPreload.forEach(img => {
-        img.element.style.visibility = 'hidden'; // Hide images initially
+        img.element.style.visibility = 'hidden';
     });
 
-    // Preload images and update their sources once loaded
+    // Preload images and update their sources once loaded, using the captured sources
     preloadImagesAndDisplay(imagesToPreload, () => {
         // Make images visible and update their sources once they are loaded
         imagesToPreload.forEach(img => {
-            img.element.src = img.src;
-            img.element.style.visibility = 'visible'; // Show images
+            img.element.src = img.src; // Use the captured src, not the potentially updated currentWordIndex
+            img.element.style.visibility = 'visible';
             img.element.style.width = imageSize + 'px';
             img.element.style.height = imageSize + 'px';
-        });
+        }); 
     });
 }
 
