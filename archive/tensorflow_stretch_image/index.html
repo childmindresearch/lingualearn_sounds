@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<!-- Website that uses a trained tensorflow model to move a marker in a plot and stretch an image. -->
+<!-- python -m http.server -->
+<!-- http://localhost:8000 -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LinguaLearn</title>
+    <link rel="stylesheet" href="style.css"> <!-- Link to CSS file -->
+</head>
+<body>
+    <div id="header">
+        <img src="assets/CMI_logo.png" alt="Logo" class="logo">
+        <div class="header-actions">
+            <h1>LinguaLearn</h1>
+            <img src="assets/start.png" alt="Start Listening" id="start-button-img">
+        </div>
+    </div>
+    <div class="container">
+        <div id="image-container">
+            <img id="image-fixed" src="" alt="fixed image">
+            <img id="image-stretch" src="" alt="stretch image">
+        </div>
+        <div id="word-display"></div>
+        <div id="grid-area"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.4.0/dist/speech-commands.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
+
