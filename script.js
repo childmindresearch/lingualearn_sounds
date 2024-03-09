@@ -1,6 +1,10 @@
 // script.js
 /* Script that uses tensorflow model to provide real-time feedback about pronunciation.
    Feedback is in the form of modified plot markers and stretched images.
+
+   GPT-4 Dall-e prompt to generate images: 
+   "create a high-resolution black and white line drawing as a png image, 
+    reminiscent of 1950s comic books, of a beetle."
 */
 
 // Define global variables in css file
