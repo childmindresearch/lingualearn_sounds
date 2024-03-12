@@ -29,7 +29,7 @@ h1 {
 #start-button-img {
     cursor: pointer;
     height: 30px;
-    width: 30px;
+    width: 100px;
     margin-left: 10px;
     visibility: visible;
     opacity: 1;
@@ -161,18 +161,20 @@ to ensure the desired appearance and functionality.
     }
 
     .header-actions {
-        flex-direction: row; /* Keeps h1 and start button inline */
-        justify-content: center; /* Centers h1 and the button within their container */
+        flex-direction: column; /* Stack items vertically */
+        align-items: center;    /* Center items horizontally */
+        /*flex-direction: row;  Keeps h1 and start button inline */
+        /* justify-content: center; Centers h1 and the button within their container */
         width: 100%; /* Ensures the container takes full width of its parent, aiding in centering */
         margin: 0; /* Resets any auto margins that may have been applied */
     }
 
     h1, #start-button-img {
-        margin: 0 5px; /* Adds a small margin to separate the h1 and start button */
+        margin: 5px 5px; /* Adds a small margin to separate the h1 and start button */
     }
 
     h1 {
-        margin-left: 55px;
+        margin-left: 5px;
     }
 
     img, #word-display, #plot-area {
